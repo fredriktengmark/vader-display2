@@ -7,49 +7,124 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #0f172a;
+      background-color: #0b0f19;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
       overflow: hidden;
+      padding: 1.25rem;
+      gap: 1.25rem;
     }
-    .container {
-      text-align: center;
-      background: rgba(30, 41, 59, 0.7);
-      padding: 3rem 4rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+
+    /* Vänster kolumn: Klocka och lokal väderdata */
+    .left-panel {
+      flex: 0 0 340px;
+      background: rgba(23, 32, 51, 0.85);
       border: 1px solid #334155;
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
-    .location { font-size: 1.5rem; font-weight: 600; color: #38bdf8; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 0.5rem; }
-    .time { font-size: 4.5rem; font-weight: 700; letter-spacing: 2px; }
-    .date { font-size: 1.4rem; color: #94a3b8; margin-bottom: 2rem; }
-    .temp { font-size: 6rem; font-weight: 800; }
-    .condition { font-size: 1.75rem; color: #cbd5e1; margin-top: 0.5rem; }
-    .meta { margin-top: 2.5rem; display: flex; gap: 2.5rem; justify-content: center; font-size: 1.25rem; color: #94a3b8; }
-    .meta span { font-weight: 500; }
+    .location { font-size: 1.3rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; }
+    .time { font-size: 3.8rem; font-weight: 700; line-height: 1.1; margin-top: 0.5rem; }
+    .date { font-size: 1.15rem; color: #94a3b8; margin-bottom: 1.5rem; }
+    .temp { font-size: 5rem; font-weight: 800; line-height: 1; }
+    .condition { font-size: 1.4rem; color: #e2e8f0; margin-top: 0.5rem; }
+    .meta { display: flex; flex-direction: column; gap: 0.75rem; font-size: 1.15rem; color: #94a3b8; margin-top: 1.5rem; }
+    .meta span { display: flex; justify-content: space-between; }
+    .meta strong { color: #f8fafc; }
+
+    /* Höger kolumn: Kartor */
+    .maps-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      height: 100%;
+    }
+
+    .map-box {
+      flex: 1;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid #334155;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      background: #111827;
+      position: relative;
+    }
+
+    .map-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      z-index: 10;
+      pointer-events: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="location">Värnamo</div>
-    <div class="time" id="time">--:--</div>
-    <div class="date" id="date">Laddar datum...</div>
-    <div class="temp" id="temp">--°C</div>
-    <div class="condition" id="condition">Hämtar prognos...</div>
+  <!-- Panel Vänster: Info -->
+  <div class="left-panel">
+    <div>
+      <div class="location">Värnamo</div>
+      <div class="time" id="time">--:--</div>
+      <div class="date" id="date">Laddar...</div>
+    </div>
+
+    <div>
+      <div class="temp" id="temp">--°C</div>
+      <div class="condition" id="condition">Hämtar väder...</div>
+    </div>
+
     <div class="meta">
-      <span id="wind">Vind: -- m/s</span>
-      <span id="humidity">Fuktighet: --%</span>
+      <span>Vind: <strong id="wind">-- m/s</strong></span>
+      <span>Luftfuktighet: <strong id="humidity">--%</strong></span>
+    </div>
+  </div>
+
+  <!-- Panel Höger: Två kartor -->
+  <div class="maps-panel">
+    <!-- Regnradar -->
+    <div class="map-box">
+      <div class="map-label">Nederbörd / Radar</div>
+      <iframe 
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <!-- Åskkarta i realtid (Blitzortung) -->
+    <div class="map-box">
+      <div class="map-label">Åskradar (Realtid)</div>
+      <iframe 
+        src="https://map.blitzortung.org/index.php?interactive=1#6.5/57.186/14.040" 
+        loading="lazy">
+      </iframe>
     </div>
   </div>
 
   <script>
-    // Koordinater för Värnamo
     const LAT = 57.1864;
     const LON = 14.0403;
 
@@ -78,15 +153,15 @@
 
         document.getElementById('temp').textContent = `${Math.round(cur.temperature_2m)}°C`;
         document.getElementById('condition').textContent = weatherCodes[cur.weather_code] || "Okänt läge";
-        document.getElementById('wind').textContent = `Vind: ${Math.round(cur.wind_speed_10m)} m/s`;
-        document.getElementById('humidity').textContent = `Fuktighet: ${cur.relative_humidity_2m}%`;
+        document.getElementById('wind').textContent = `${Math.round(cur.wind_speed_10m)} m/s`;
+        document.getElementById('humidity').textContent = `${cur.relative_humidity_2m}%`;
       } catch (err) {
         document.getElementById('condition').textContent = "Kunde inte hämta data";
       }
     }
 
     setInterval(updateClock, 1000);
-    setInterval(fetchWeather, 15 * 60 * 1000); // Uppdateras automatiskt var 15:e minut
+    setInterval(fetchWeather, 15 * 60 * 1000);
 
     updateClock();
     fetchWeather();
