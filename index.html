@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KONTROLLRUM - VÄRNAMO / JÖNKÖPINGS LÄN</title>
+  <title>DASHBOARD FTE VÄRNAMO REGIONFASTIGHETER</title>
   <style>
     :root {
       --bg-dark: #05070c;
@@ -31,37 +31,42 @@
       gap: 0.75rem;
     }
 
-    /* Toppbanner: Status & Klocka */
+    /* Toppbanner: Status & Extra stor Klocka */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: var(--panel-bg);
       border: 1px solid var(--border-color);
-      padding: 0.5rem 1.25rem;
+      border-left: 5px solid var(--alert-red);
+      padding: 0.75rem 1.5rem;
       border-radius: 6px;
     }
     .top-title {
-      font-size: 1rem;
-      font-weight: 800;
+      font-size: 1.25rem;
+      font-weight: 900;
       letter-spacing: 2px;
-      color: var(--accent-blue);
+      color: var(--alert-red);
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
     }
     .top-clock {
       font-family: ui-monospace, "SF Mono", "Cascadia Code", monospace;
-      font-size: 1.4rem;
-      font-weight: 700;
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1;
       color: #fff;
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      align-items: baseline;
+      gap: 1.25rem;
     }
     .top-date {
-      color: var(--text-muted);
-      font-size: 0.95rem;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      font-weight: 600;
       text-transform: capitalize;
     }
 
@@ -262,11 +267,11 @@
 </head>
 <body>
 
-  <!-- Topprad med systemstatus och klocka -->
+  <!-- Topprad med systemstatus och förstorad klocka -->
   <header class="top-bar">
     <div class="top-title">
-      <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent-blue);"></span>
-      OPS DASHBOARD // VÄRNAMO // JÖNKÖPINGS LÄN
+      <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--alert-red); box-shadow:0 0 8px var(--alert-red);"></span>
+      DASHBOARD FTE VÄRNAMO REGIONFASTIGHETER
     </div>
     <div class="top-clock">
       <span class="top-date" id="date">--</span>
@@ -390,7 +395,7 @@
       }
     }
 
-    // Trafikverkets API: Strikt filtrerat på CountyNo 6 (Jönköping)
+    // Trafikverket API: Filtrerat strikt på länskod 6 (Jönköpings län)
     async function fetchTraffic() {
       const feed = document.getElementById('traffic-feed');
       const counter = document.getElementById('traffic-counter');
@@ -451,7 +456,6 @@
         if (!res.ok) throw new Error('Status ' + res.status);
         const list = await res.json();
 
-        // Sökning på Jönköping / Värnamo
         const vmaMatch = list.find(item => {
           const raw = ((item.PushMessage || "") + " " + (item.BodyText || "") + " " + (item.Headline || "")).toLowerCase();
           return raw.includes('jönköping') || raw.includes('värnamo');
@@ -483,11 +487,11 @@
       if (lightning) lightning.src = lightning.src;
     }
 
-    // Intervall
+    // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
-    setInterval(fetchTraffic, 2 * 60 * 1000); // Kontrollrumscykel: 2 min för trafik
-    setInterval(fetchVMA, 1 * 60 * 1000);     // Kontrollrumscykel: 1 min för VMA
+    setInterval(fetchTraffic, 2 * 60 * 1000);
+    setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
     // Initial körning
