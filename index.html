@@ -173,11 +173,11 @@
       <div id="vma-body" class="vma-status">Kontrollerar VMA i Jönköpings län...</div>
     </div>
 
-    <!-- Trafiksektion -->
+    <!-- Trafiksektion: Länskod 6 -->
     <div class="traffic-section">
-      <div class="traffic-header">Trafik P4 Jönköping</div>
+      <div class="traffic-header">Trafikläget i Jönköpings län</div>
       <div class="traffic-list" id="traffic-list">
-        <div class="traffic-item">Söker trafikläget...</div>
+        <div class="traffic-item">Söker trafikstörningar...</div>
       </div>
     </div>
   </div>
@@ -236,25 +236,53 @@
       }
     }
 
+    // Trafikverkets API: Strikt begränsad till CountyNo 6 (Jönköpings län)
     async function fetchTraffic() {
       const container = document.getElementById('traffic-list');
+      const xmlPayload = `
+        <REQUEST>
+          <LOGIN authenticationkey="5d4f134267254589a1fbbd09793108c9" />
+          <QUERY objecttype="Situation" schemaversion="1.5" limit="5">
+            <FILTER>
+              <EQ name="Deviation.CountyNo" value="6" />
+            </FILTER>
+            <INCLUDE>Deviation.Header</INCLUDE>
+            <INCLUDE>Deviation.Message</INCLUDE>
+            <INCLUDE>Deviation.RoadNumber</INCLUDE>
+          </QUERY>
+        </REQUEST>`;
+
       try {
-        const res = await fetch('https://api.sr.se/api/v2/traffic/messages?trafficareaid=10&format=json&size=5');
-        const data = await res.json();
-        
-        if (!data.messages || data.messages.length === 0) {
-          container.innerHTML = '<div class="traffic-item" style="color:#94a3b8;">Inga aktiva störningar rapporterade.</div>';
+        const res = await fetch('https://api.trafikinfo.trafikverket.se/v2/data.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/xml' },
+          body: xmlPayload
+        });
+        const json = await res.json();
+        const situations = json.RESPONSE?.RESULT?.[0]?.Situation || [];
+
+        const deviations = [];
+        situations.forEach(sit => {
+          if (Array.isArray(sit.Deviation)) {
+            deviations.push(...sit.Deviation);
+          } else if (sit.Deviation) {
+            deviations.push(sit.Deviation);
+          }
+        });
+
+        if (deviations.length === 0) {
+          container.innerHTML = '<div class="traffic-item" style="color:#94a3b8;">Inga aktiva trafikstörningar i länet.</div>';
           return;
         }
 
-        container.innerHTML = data.messages.map(msg => `
+        container.innerHTML = deviations.slice(0, 5).map(dev => `
           <div class="traffic-item">
-            <div class="traffic-title">${msg.title}</div>
-            <div class="traffic-desc">${msg.description}</div>
+            <div class="traffic-title">${dev.RoadNumber ? 'Väg ' + dev.RoadNumber + ': ' : ''}${dev.Header || 'Trafikstörning'}</div>
+            <div class="traffic-desc">${dev.Message || 'Ingen ytterligare information.'}</div>
           </div>
         `).join('');
       } catch (err) {
-        container.innerHTML = '<div class="traffic-item" style="color:#f87171;">Kunde inte läsa in trafikdata.</div>';
+        container.innerHTML = '<div class="traffic-item" style="color:#f87171;">Kunde inte läsa in trafikdata från länet.</div>';
       }
     }
 
@@ -264,12 +292,11 @@
       const body = document.getElementById('vma-body');
 
       try {
-        // Hämtar alla aktiva VMA via Krisinformation
         const res = await fetch('https://api.krisinformation.se/v3/vmas');
         if (!res.ok) throw new Error('Status ' + res.status);
         const list = await res.json();
 
-        // Filtrerar på Jönköpings län eller Värnamo
+        // Strikt kontroll mot Jönköpings län eller Värnamo
         const match = list.find(item => {
           const text = ((item.PushMessage || "") + " " + (item.BodyText || "") + " " + (item.Headline || "")).toLowerCase();
           return text.includes('jönköping') || text.includes('värnamo');
@@ -285,10 +312,9 @@
           body.textContent = 'Inga aktiva VMA i Jönköpings län.';
         }
       } catch (err) {
-        // Visas om webbläsaren blockerar anropet på grund av CORS
         card.classList.remove('active');
         icon.textContent = 'ℹ️';
-        body.textContent = 'Kunde inte kontakta Krisinformation (CORS/nätverksfel).';
+        body.textContent = 'Kunde inte kontakta Krisinformation.';
       }
     }
 
@@ -306,7 +332,7 @@
     setInterval(fetchVMA, 2 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
-    // Initial körning
+    // Start
     updateClock();
     fetchWeather();
     fetchTraffic();
