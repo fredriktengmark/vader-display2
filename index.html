@@ -2,181 +2,366 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Väder Dashboard - Värnamo</title>
+  <meta name="viewport" content="width=1024, height=600, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Outpost Monitor - Jönköpings Län</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
-      background-color: #0b0f19;
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      height: 100vh;
-      width: 100vw;
+      width: 1024px;
+      height: 600px;
+      margin: 0;
+      padding: 12px;
       overflow: hidden;
-      padding: 1.25rem;
-      gap: 1.25rem;
+      user-select: none;
+      background-color: #0d0907;
+      color: #dfd2be;
+      font-family: 'Special Elite', monospace;
     }
-
-    /* Vänster kolumn */
-    .left-panel {
-      flex: 0 0 340px;
-      background: rgba(23, 32, 51, 0.85);
-      border: 1px solid #334155;
-      border-radius: 1rem;
-      padding: 2rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    .font-western {
+      font-family: 'Rye', serif;
     }
-    .location { font-size: 1.3rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; }
-    .time { font-size: 3.8rem; font-weight: 700; line-height: 1.1; margin-top: 0.5rem; }
-    .date { font-size: 1.15rem; color: #94a3b8; margin-bottom: 1.5rem; }
-    .temp { font-size: 5rem; font-weight: 800; line-height: 1; }
-    .condition { font-size: 1.4rem; color: #e2e8f0; margin-top: 0.5rem; }
-    .meta { display: flex; flex-direction: column; gap: 0.75rem; font-size: 1.15rem; color: #94a3b8; margin-top: 1.5rem; }
-    .meta span { display: flex; justify-content: space-between; }
-    .meta strong { color: #f8fafc; }
-
-    /* Höger kolumn: Kartor */
-    .maps-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      height: 100%;
+    .saloon-card {
+      background: radial-gradient(circle at top left, #241710, #150e0a);
+      border: 2px solid #543319;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.7);
     }
-
-    .map-box {
-      flex: 1;
-      border-radius: 1rem;
-      overflow: hidden;
-      border: 1px solid #334155;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      background: #111827;
-      position: relative;
+    .action-btn {
+      background: linear-gradient(180deg, #331e13 0%, #1c100a 100%);
+      border: 1px solid #7c4822;
+      transition: transform 0.1s, background-color 0.1s;
     }
-
-    .map-label {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(15, 23, 42, 0.85);
-      color: #cbd5e1;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid #334155;
-      z-index: 10;
-      pointer-events: none;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .action-btn:active {
+      transform: scale(0.96);
+      background: #4a2815;
     }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #7c4822;
+      border-radius: 2px;
+    }
+    @keyframes alertPulse {
+      0%, 100% { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+      50% { border-color: #7f1d1d; box-shadow: 0 0 5px rgba(127, 29, 29, 0.2); }
+    }
+    .vma-active {
+      animation: alertPulse 1.5s infinite;
+      background: #2a0b0b !important;
     }
   </style>
 </head>
-<body>
+<body class="flex flex-col justify-between h-full">
 
-  <!-- Panel Vänster: Info -->
-  <div class="left-panel">
-    <div>
-      <div class="location">Värnamo</div>
-      <div class="time" id="time">--:--</div>
-      <div class="date" id="date">Laddar...</div>
+  <!-- TOP BAR: KLOCKA, DATUM & VMA-STATUS -->
+  <header class="saloon-card rounded-lg px-6 py-2 flex items-center justify-between">
+    <div class="flex items-baseline space-x-6">
+      <div id="live-clock" class="text-5xl font-western text-amber-500 tracking-wider">--:--</div>
+      <div id="live-date" class="text-sm text-amber-200/70 capitalize tracking-wide">Laddar datum...</div>
     </div>
 
-    <div>
-      <div class="temp" id="temp">--°C</div>
-      <div class="condition" id="condition">Hämtar väder...</div>
+    <!-- VMA BANNER -->
+    <div id="vma-badge" class="px-4 py-1 rounded border border-emerald-900/60 bg-emerald-950/30 flex items-center space-x-2">
+      <span id="vma-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+      <span id="vma-text" class="text-xs tracking-wider uppercase font-bold text-emerald-400">Inga aktiva VMA • Jönköpings Län</span>
     </div>
 
-    <div class="meta">
-      <span>Vind: <strong id="wind">-- m/s</strong></span>
-      <span>Luftfuktighet: <strong id="humidity">--%</strong></span>
+    <div class="text-right">
+      <div class="text-[11px] uppercase tracking-widest text-amber-600 font-bold">Länsbevakning</div>
+      <div class="text-xs text-stone-400">Jönköpings Län</div>
     </div>
-  </div>
+  </header>
 
-  <!-- Panel Höger: Kartor -->
-  <div class="maps-panel">
-    <!-- Regnradar -->
-    <div class="map-box">
-      <div class="map-label">Nederbörd / Radar (Realtid)</div>
-      <iframe 
-        id="radar-frame"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
-        loading="lazy">
-      </iframe>
+  <!-- MITTENSEKTION (3 KOLUMNER) -->
+  <main class="grid grid-cols-12 gap-3 my-auto h-[480px]">
+
+    <!-- 1. VÄDER & HEMSTYRNING (4 KOLUMNER) -->
+    <div class="col-span-4 flex flex-col justify-between space-y-3">
+      
+      <!-- Väder -->
+      <section class="saloon-card rounded-lg p-4 h-[210px] flex flex-col justify-between">
+        <div class="border-b border-amber-900/40 pb-1 flex justify-between items-baseline">
+          <h2 class="text-amber-500 font-western text-base tracking-wide">Väder</h2>
+          <span class="text-[11px] text-stone-400">Open-Meteo</span>
+        </div>
+
+        <div class="flex items-center justify-around my-auto">
+          <div class="text-center">
+            <div id="temp-display" class="text-5xl font-western text-stone-100">--°</div>
+            <div id="condition-display" class="text-xs text-amber-400 mt-1 font-western">Hämtar...</div>
+          </div>
+          <div class="space-y-1.5 text-xs text-stone-300 border-l border-amber-900/30 pl-4">
+            <div>Vind: <strong id="wind-display" class="text-stone-100">-- m/s</strong></div>
+            <div>Känns som: <strong id="apparent-display" class="text-stone-100">--°C</strong></div>
+            <div>Fuktighet: <strong id="humidity-display" class="text-stone-100">--%</strong></div>
+          </div>
+        </div>
+
+        <div class="text-[10px] text-stone-500 flex justify-between border-t border-amber-900/30 pt-1">
+          <span>Prognosområde F</span>
+          <span id="weather-sync">--:--</span>
+        </div>
+      </section>
+
+      <!-- Hemstyrning -->
+      <section class="saloon-card rounded-lg p-4 h-[255px] flex flex-col justify-between">
+        <div class="border-b border-amber-900/40 pb-1 flex justify-between items-baseline">
+          <h2 class="text-amber-500 font-western text-base tracking-wide">Hemstyrning</h2>
+          <span id="hub-status" class="text-[11px] text-amber-500/80">Redo</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 my-auto">
+          <button onclick="runCommand('light_on')" class="action-btn p-2 rounded text-left h-20 flex flex-col justify-between cursor-pointer">
+            <span class="text-base">💡</span>
+            <span class="text-amber-400 text-xs font-bold leading-tight">Tänd Allt</span>
+            <span class="text-[10px] text-stone-400">Normalbelysning</span>
+          </button>
+
+          <button onclick="runCommand('light_off')" class="action-btn p-2 rounded text-left h-20 flex flex-col justify-between cursor-pointer">
+            <span class="text-base">🌙</span>
+            <span class="text-stone-300 text-xs font-bold leading-tight">Släck Allt</span>
+            <span class="text-[10px] text-stone-500">Nattläge</span>
+          </button>
+
+          <button onclick="runCommand('scene_cozy')" class="action-btn p-2 rounded text-left h-20 flex flex-col justify-between cursor-pointer">
+            <span class="text-base">🔥</span>
+            <span class="text-amber-500 text-xs font-bold leading-tight">Myskväll</span>
+            <span class="text-[10px] text-stone-400">Dämpad belysning</span>
+          </button>
+
+          <button onclick="runCommand('scene_leave')" class="action-btn p-2 rounded text-left h-20 flex flex-col justify-between cursor-pointer">
+            <span class="text-base">🚪</span>
+            <span class="text-amber-600 text-xs font-bold leading-tight">Lämna</span>
+            <span class="text-[10px] text-stone-400">Släck & larma</span>
+          </button>
+        </div>
+
+        <div class="text-[10px] text-stone-500 text-center border-t border-amber-900/30 pt-1">
+          Kopplat till Webhooks
+        </div>
+      </section>
+
     </div>
 
-    <!-- Åskradar -->
-    <div class="map-box">
-      <div class="map-label">Åskradar (Realtid / Blixtar)</div>
-      <iframe 
-        id="lightning-frame"
-        src="https://map.blitzortung.org/index.php?interactive=1#6.5/57.186/14.040" 
-        loading="lazy">
-      </iframe>
-    </div>
-  </div>
+    <!-- 2. TRAFIKRAPPORT JÖNKÖPINGS LÄN (8 KOLUMNER) -->
+    <section class="col-span-8 saloon-card rounded-lg p-5 flex flex-col justify-between h-full">
+      <div class="border-b border-amber-900/40 pb-2 flex justify-between items-center">
+        <div>
+          <h2 class="text-amber-500 font-western text-lg tracking-wide">Trafikläget • Jönköpings Län</h2>
+          <span class="text-xs text-stone-400">Sveriges Radio P4 Jönköping / Trafik</span>
+        </div>
+        <button onclick="loadTraffic()" class="px-3 py-1 bg-amber-950/40 border border-amber-800 rounded text-xs text-amber-300 hover:bg-amber-900/60 active:scale-95 transition">
+          Uppdatera
+        </button>
+      </div>
 
+      <!-- TRAFIKLISTA -->
+      <div id="traffic-feed" class="overflow-y-auto custom-scroll pr-2 space-y-2.5 my-2 h-[380px]">
+        <div class="text-stone-400 text-sm text-center py-12">Söker efter aktuella trafikhändelser...</div>
+      </div>
+
+      <div class="border-t border-amber-900/40 pt-2 flex justify-between text-[11px] text-stone-500">
+        <span>Källa: Sveriges Radio Trafik API</span>
+        <span>Senast kontrollerad: <span id="traffic-sync" class="text-stone-400">--:--</span></span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- WAKE LOCK & SKRIPT -->
   <script>
-    const LAT = 57.1864;
-    const LON = 14.0403;
+    // 1. KLOCKA & DATUM
+    function refreshClock() {
+      const now = new Date();
+      document.getElementById('live-clock').innerText = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('live-date').innerText = now.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+    setInterval(refreshClock, 1000);
+    refreshClock();
 
-    const weatherCodes = {
-      0: "Klart",
-      1: "Mestadels klart", 2: "Halvklart", 3: "Molnigt",
-      45: "Dimma", 48: "Rimfrostdimma",
-      51: "Lätt duggregn", 53: "Duggregn", 55: "Tätt duggregn",
-      61: "Lätt regn", 63: "Regn", 65: "Kraftigt regn",
-      71: "Lätt snöfall", 73: "Snöfall", 75: "Kraftigt snöfall",
-      80: "Lätta regnskurar", 81: "Regnskurar", 82: "Kraftiga skurar",
-      95: "Åskväder"
+    // 2. VÄDER VIA OPEN-METEO
+    const WMO_SV = {
+      0: "Klart", 1: "Mestadels klart", 2: "Halvklart", 3: "Mulet",
+      45: "Dimma", 51: "Lätt duggregn", 61: "Lätt regn", 63: "Regn",
+      65: "Kraftigt regn", 71: "Snöfall", 80: "Regnskurar", 95: "Åska"
     };
 
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('time').textContent = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('date').textContent = now.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
-    }
-
-    async function fetchWeather() {
+    async function loadWeather() {
       try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&wind_speed_unit=ms`);
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=57.18&longitude=14.04&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&wind_speed_unit=ms");
         const data = await res.json();
         const cur = data.current;
 
-        document.getElementById('temp').textContent = `${Math.round(cur.temperature_2m)}°C`;
-        document.getElementById('condition').textContent = weatherCodes[cur.weather_code] || "Okänt läge";
-        document.getElementById('wind').textContent = `${Math.round(cur.wind_speed_10m)} m/s`;
-        document.getElementById('humidity').textContent = `${cur.relative_humidity_2m}%`;
+        document.getElementById('temp-display').innerText = `${Math.round(cur.temperature_2m)}°`;
+        document.getElementById('apparent-display').innerText = `${Math.round(cur.apparent_temperature)}°C`;
+        document.getElementById('wind-display').innerText = `${cur.wind_speed_10m} m/s`;
+        document.getElementById('humidity-display').innerText = `${cur.relative_humidity_2m}%`;
+        document.getElementById('condition-display').innerText = WMO_SV[cur.weather_code] || "Varierande";
+        document.getElementById('weather-sync').innerText = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
       } catch (err) {
-        document.getElementById('condition').textContent = "Kunde inte hämta data";
+        document.getElementById('condition-display').innerText = "Ej tillgängligt";
       }
     }
+    loadWeather();
+    setInterval(loadWeather, 10 * 60 * 1000);
 
-    // Tvingar kartorna att ladda om färsk data i bakgrunden utan att sidan blinkar
-    function refreshMaps() {
-      const radar = document.getElementById('radar-frame');
-      const lightning = document.getElementById('lightning-frame');
-      if (radar) radar.src = radar.src;
-      if (lightning) lightning.src = lightning.src;
+    // 3. VMA-BEVAKNING (KRISINFORMATION.SE)
+    async function checkVMA() {
+      const badge = document.getElementById('vma-badge');
+      const dot = document.getElementById('vma-dot');
+      const text = document.getElementById('vma-text');
+
+      try {
+        const res = await fetch("https://api.krisinformation.se/v3/vmas");
+        if (!res.ok) throw new Error();
+        const items = await res.json();
+
+        // Filtrera larm mot Jönköpings län
+        const activeVMA = items.filter(vma => {
+          const body = (vma.BodyText || "").toLowerCase();
+          const headline = (vma.Headline || "").toLowerCase();
+          const areas = (vma.Area || []).map(a => (a.Description || "").toLowerCase()).join(" ");
+          
+          return areas.includes("jönköping") || body.includes("jönköpings län") || headline.includes("jönköping");
+        });
+
+        if (activeVMA.length > 0) {
+          const larm = activeVMA[0];
+          badge.className = "px-4 py-1 rounded border vma-active flex items-center space-x-2";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping";
+          text.className = "text-xs tracking-wider uppercase font-bold text-rose-300";
+          text.innerText = `🚨 VMA AKTIVT: ${larm.Headline || "Varning i länet"}`;
+        } else {
+          badge.className = "px-4 py-1 rounded border border-emerald-900/60 bg-emerald-950/30 flex items-center space-x-2";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+          text.className = "text-xs tracking-wider uppercase font-bold text-emerald-400";
+          text.innerText = "Inga aktiva VMA • Jönköpings Län";
+        }
+      } catch (e) {
+        text.innerText = "VMA: Status okänd";
+      }
+    }
+    checkVMA();
+    setInterval(checkVMA, 2 * 60 * 1000); // Kontrollera varannan minut
+
+    // 4. TRAFIKRAPPORT (SR TRAFIK API FÖR TRAFIKOMRÅDE JÖNKÖPING)
+    // Område 313 = SR Jönköping / P4 Jönköpings sändningsområde
+    async function loadTraffic() {
+      const feed = document.getElementById('traffic-feed');
+      document.getElementById('traffic-sync').innerText = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+
+      try {
+        const res = await fetch("https://api.sr.se/api/v2/traffic/messages?trafficregulationareaid=313&format=json&size=15");
+        const data = await res.json();
+        const messages = data.messages || [];
+
+        if (messages.length === 0) {
+          feed.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center text-stone-400">
+              <span class="text-3xl mb-2">🟢</span>
+              <p class="font-western text-amber-500/90 text-sm">Inga aktiva trafikstörningar</p>
+              <p class="text-xs text-stone-500 mt-1">Vägnätet i Jönköpings län flyter på utan kända problem.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = messages.map(msg => {
+          // Prioritet: 1 = Mycket hög, 2 = Stor, 3 = Mindre
+          let borderAccent = "border-amber-900/50";
+          let badgeColor = "bg-amber-950/60 text-amber-300 border-amber-800";
+          
+          if (msg.priority === 1) {
+            borderAccent = "border-rose-700 bg-rose-950/20";
+            badgeColor = "bg-rose-950 text-rose-300 border-rose-700";
+          } else if (msg.priority === 2) {
+            borderAccent = "border-amber-600/70 bg-amber-950/20";
+            badgeColor = "bg-amber-900/80 text-amber-200 border-amber-600";
+          }
+
+          const catName = msg.category === 0 ? "Vägtrafik" : 
+                          msg.category === 1 ? "Kollektivt" : 
+                          msg.category === 2 ? "Planerat arbete" : "Övrigt";
+
+          return `
+            <div class="p-3 rounded bg-black/40 border ${borderAccent} transition">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="font-bold text-amber-400 text-xs">${msg.title}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded border uppercase tracking-wider ${badgeColor}">${catName}</span>
+              </div>
+              <p class="text-xs text-stone-300 leading-relaxed">${msg.description}</p>
+              <div class="text-[10px] text-stone-500 mt-1 text-right">
+                ${msg.exactlocation ? `Plats: ${msg.exactlocation}` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        feed.innerHTML = `
+          <div class="text-stone-400 text-sm text-center py-12">
+            Kunde inte hämta trafikdata just nu. Försöker igen automatiskt.
+          </div>
+        `;
+      }
+    }
+    loadTraffic();
+    setInterval(loadTraffic, 5 * 60 * 1000); // Uppdateras var 5:e minut
+
+    // 5. HEMSTYRNINGS-TRIGGERS
+    const COMMAND_URLS = {
+      light_on: "",
+      light_off: "",
+      scene_cozy: "",
+      scene_leave: ""
+    };
+
+    function runCommand(key) {
+      const status = document.getElementById('hub-status');
+      const url = COMMAND_URLS[key];
+
+      status.innerText = "Sänder signal...";
+      status.className = "text-[11px] text-amber-300 font-bold";
+
+      if (!url) {
+        setTimeout(() => {
+          status.innerText = "Skickat (Demo)";
+          setTimeout(() => {
+            status.innerText = "Redo";
+            status.className = "text-[11px] text-amber-500/80";
+          }, 2000);
+        }, 250);
+        return;
+      }
+
+      fetch(url, { method: 'POST', mode: 'no-cors' })
+        .then(() => {
+          status.innerText = "Utfört!";
+          setTimeout(() => {
+            status.innerText = "Redo";
+            status.className = "text-[11px] text-amber-500/80";
+          }, 2000);
+        })
+        .catch(() => {
+          status.innerText = "Kunde ej nå";
+          setTimeout(() => {
+            status.innerText = "Redo";
+            status.className = "text-[11px] text-amber-500/80";
+          }, 2000);
+        });
     }
 
-    // Intervall
-    setInterval(updateClock, 1000);
-    setInterval(fetchWeather, 10 * 60 * 1000); // Väderuppdatering var 10:e min
-    setInterval(refreshMaps, 10 * 60 * 1000);   // Kartuppdatering var 10:e min
-
-    updateClock();
-    fetchWeather();
+    // 6. SCREEN WAKE LOCK
+    if ('wakeLock' in navigator) {
+      navigator.wakeLock.request('screen').catch(() => {});
+    }
   </script>
 </body>
 </html>
