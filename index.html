@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Väder Dashboard - Värnamo</title>
+  <title>Väder & Trafik - Värnamo</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -11,33 +11,94 @@
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
+      flex-direction: column;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
       padding: 1.25rem;
+      gap: 1rem;
+    }
+
+    /* VMA Varningsbanner */
+    .vma-banner {
+      display: none;
+      background: #b91c1c;
+      border: 1px solid #ef4444;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    /* Huvudlayout */
+    .dashboard-container {
+      display: flex;
+      flex: 1;
       gap: 1.25rem;
+      height: 100%;
+      min-height: 0;
     }
 
     /* Vänster kolumn */
     .left-panel {
-      flex: 0 0 340px;
+      flex: 0 0 360px;
       background: rgba(23, 32, 51, 0.85);
       border: 1px solid #334155;
       border-radius: 1rem;
-      padding: 2rem 1.5rem;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      gap: 1.2rem;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
     }
     .location { font-size: 1.3rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; }
-    .time { font-size: 3.8rem; font-weight: 700; line-height: 1.1; margin-top: 0.5rem; }
-    .date { font-size: 1.15rem; color: #94a3b8; margin-bottom: 1.5rem; }
-    .temp { font-size: 5rem; font-weight: 800; line-height: 1; }
-    .condition { font-size: 1.4rem; color: #e2e8f0; margin-top: 0.5rem; }
-    .meta { display: flex; flex-direction: column; gap: 0.75rem; font-size: 1.15rem; color: #94a3b8; margin-top: 1.5rem; }
+    .time { font-size: 3.5rem; font-weight: 700; line-height: 1; margin-top: 0.25rem; }
+    .date { font-size: 1.05rem; color: #94a3b8; }
+    .temp { font-size: 4rem; font-weight: 800; line-height: 1; }
+    .condition { font-size: 1.25rem; color: #e2e8f0; margin-top: 0.25rem; }
+    .meta { display: flex; flex-direction: column; gap: 0.4rem; font-size: 1rem; color: #94a3b8; }
     .meta span { display: flex; justify-content: space-between; }
     .meta strong { color: #f8fafc; }
+
+    /* Trafiksektion */
+    .traffic-section {
+      border-top: 1px solid #334155;
+      padding-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      min-height: 160px;
+    }
+    .traffic-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .traffic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      padding-right: 4px;
+    }
+    .traffic-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #1e293b;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+    .traffic-title { font-weight: 600; color: #f1f5f9; margin-bottom: 0.2rem; }
+    .traffic-desc { color: #94a3b8; line-height: 1.2; }
 
     /* Höger kolumn: Kartor */
     .maps-panel {
@@ -47,7 +108,6 @@
       gap: 1.25rem;
       height: 100%;
     }
-
     .map-box {
       flex: 1;
       border-radius: 1rem;
@@ -57,7 +117,6 @@
       background: #111827;
       position: relative;
     }
-
     .map-label {
       position: absolute;
       top: 10px;
@@ -74,55 +133,59 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+    iframe { width: 100%; height: 100%; border: none; }
   </style>
 </head>
 <body>
 
-  <!-- Panel Vänster: Info -->
-  <div class="left-panel">
-    <div>
-      <div class="location">Värnamo</div>
-      <div class="time" id="time">--:--</div>
-      <div class="date" id="date">Laddar...</div>
-    </div>
-
-    <div>
-      <div class="temp" id="temp">--°C</div>
-      <div class="condition" id="condition">Hämtar väder...</div>
-    </div>
-
-    <div class="meta">
-      <span>Vind: <strong id="wind">-- m/s</strong></span>
-      <span>Luftfuktighet: <strong id="humidity">--%</strong></span>
-    </div>
+  <div id="vma-banner" class="vma-banner">
+    ⚠️ <span id="vma-text"></span>
   </div>
 
-  <!-- Panel Höger: Kartor -->
-  <div class="maps-panel">
-    <!-- Regnradar -->
-    <div class="map-box">
-      <div class="map-label">Nederbörd / Radar (Realtid)</div>
-      <iframe 
-        id="radar-frame"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
-        loading="lazy">
-      </iframe>
+  <div class="dashboard-container">
+    <div class="left-panel">
+      <div>
+        <div class="location">Värnamo</div>
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date">Laddar...</div>
+      </div>
+
+      <div>
+        <div class="temp" id="temp">--°C</div>
+        <div class="condition" id="condition">Hämtar väder...</div>
+      </div>
+
+      <div class="meta">
+        <span>Vind: <strong id="wind">-- m/s</strong></span>
+        <span>Luftfuktighet: <strong id="humidity">--%</strong></span>
+      </div>
+
+      <div class="traffic-section">
+        <div class="traffic-header">Trafik P4 Jönköping</div>
+        <div class="traffic-list" id="traffic-list">
+          <div class="traffic-item">Söker trafikläget...</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Åskradar -->
-    <div class="map-box">
-      <div class="map-label">Åskradar (Realtid / Blixtar)</div>
-      <iframe 
-        id="lightning-frame"
-        src="https://map.blitzortung.org/index.php?interactive=1#6.5/57.186/14.040" 
-        loading="lazy">
-      </iframe>
+    <div class="maps-panel">
+      <div class="map-box">
+        <div class="map-label">Nederbörd / Radar (Realtid)</div>
+        <iframe 
+          id="radar-frame"
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <div class="map-box">
+        <div class="map-label">Åskradar (Realtid / Blixtar)</div>
+        <iframe 
+          id="lightning-frame"
+          src="https://map.blitzortung.org/index.php?interactive=1#6.5/57.186/14.040" 
+          loading="lazy">
+        </iframe>
+      </div>
     </div>
   </div>
 
@@ -131,14 +194,11 @@
     const LON = 14.0403;
 
     const weatherCodes = {
-      0: "Klart",
-      1: "Mestadels klart", 2: "Halvklart", 3: "Molnigt",
-      45: "Dimma", 48: "Rimfrostdimma",
-      51: "Lätt duggregn", 53: "Duggregn", 55: "Tätt duggregn",
-      61: "Lätt regn", 63: "Regn", 65: "Kraftigt regn",
+      0: "Klart", 1: "Mestadels klart", 2: "Halvklart", 3: "Molnigt",
+      45: "Dimma", 48: "Rimfrostdimma", 51: "Lätt duggregn", 53: "Duggregn",
+      55: "Tätt duggregn", 61: "Lätt regn", 63: "Regn", 65: "Kraftigt regn",
       71: "Lätt snöfall", 73: "Snöfall", 75: "Kraftigt snöfall",
-      80: "Lätta regnskurar", 81: "Regnskurar", 82: "Kraftiga skurar",
-      95: "Åskväder"
+      80: "Lätta regnskurar", 81: "Regnskurar", 82: "Kraftiga skurar", 95: "Åskväder"
     };
 
     function updateClock() {
@@ -162,7 +222,54 @@
       }
     }
 
-    // Tvingar kartorna att ladda om färsk data i bakgrunden utan att sidan blinkar
+    async function fetchTraffic() {
+      const container = document.getElementById('traffic-list');
+      try {
+        // SR Trafik API: Jönköpings län (trafficareaid=10)
+        const res = await fetch('https://api.sr.se/api/v2/traffic/messages?trafficareaid=10&format=json&size=6');
+        const data = await res.json();
+        
+        if (!data.messages || data.messages.length === 0) {
+          container.innerHTML = '<div class="traffic-item" style="color:#94a3b8;">Inga rapporterade störningar just nu.</div>';
+          return;
+        }
+
+        container.innerHTML = data.messages.map(msg => `
+          <div class="traffic-item">
+            <div class="traffic-title">${msg.title}</div>
+            <div class="traffic-desc">${msg.description}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<div class="traffic-item" style="color:#ef4444;">Kunde inte läsa in trafikdata.</div>';
+      }
+    }
+
+    async function fetchVMA() {
+      try {
+        const res = await fetch('https://api.krisinformation.se/v3/vmas');
+        const list = await res.json();
+        
+        // Kontrollera aktiva VMA mot Jönköpings län / Värnamo
+        const jonkopingVma = list.find(item => {
+          const body = (item.PushMessage || item.BodyText || "").toLowerCase();
+          return body.includes('jönköping') || body.includes('värnamo');
+        });
+
+        const banner = document.getElementById('vma-banner');
+        const text = document.getElementById('vma-text');
+
+        if (jonkopingVma) {
+          text.textContent = `VIKTIGT MEDDELANDE: ${jonkopingVma.PushMessage || jonkopingVma.Headline}`;
+          banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
+        }
+      } catch (err) {
+        console.warn('VMA kunde inte hämtas:', err);
+      }
+    }
+
     function refreshMaps() {
       const radar = document.getElementById('radar-frame');
       const lightning = document.getElementById('lightning-frame');
@@ -170,13 +277,18 @@
       if (lightning) lightning.src = lightning.src;
     }
 
-    // Intervall
+    // Intervaller
     setInterval(updateClock, 1000);
-    setInterval(fetchWeather, 10 * 60 * 1000); // Väderuppdatering var 10:e min
-    setInterval(refreshMaps, 10 * 60 * 1000);   // Kartuppdatering var 10:e min
+    setInterval(fetchWeather, 10 * 60 * 1000);
+    setInterval(fetchTraffic, 3 * 60 * 1000); // Trafik uppdateras var 3:e minut
+    setInterval(fetchVMA, 2 * 60 * 1000);     // VMA kontrolleras varannan minut
+    setInterval(refreshMaps, 10 * 60 * 1000);
 
+    // Initial körning
     updateClock();
     fetchWeather();
+    fetchTraffic();
+    fetchVMA();
   </script>
 </body>
 </html>
