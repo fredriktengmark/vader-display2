@@ -3,31 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontrollrum – Lägesbild Jönköpings Län</title>
+  <title>Kontrollrum – Jönköpings Län</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
-      --bg-main: #0b0f19;
-      --panel-bg: rgba(18, 26, 43, 0.85);
-      --border-color: #22324e;
-      --text-main: #f1f5f9;
-      --text-dim: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-amber: #f59e0b;
-      --accent-red: #ef4444;
-      --accent-green: #10b981;
+      --bg: #070a13;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --green: #22c55e;
+      --yellow: #facc15;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
       height: 100vh;
       overflow: hidden;
       display: flex;
@@ -35,387 +31,426 @@
     }
 
     header {
-      height: 64px;
-      background: var(--panel-bg);
-      border-bottom: 1px solid var(--border-color);
+      height: 60px;
+      background: #0f172a;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 24px;
-      backdrop-filter: blur(8px);
     }
 
-    .system-status {
+    .status-badge {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .live-dot {
-      width: 10px;
-      height: 10px;
-      background: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-green);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .title {
-      font-size: 1.15rem;
+      gap: 10px;
       font-weight: 700;
       letter-spacing: 1px;
+      color: var(--blue);
       text-transform: uppercase;
-      color: var(--accent-blue);
+      font-size: 0.95rem;
     }
 
-    .clock-group {
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--green);
+      animation: flash 1.5s infinite;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .clock {
       text-align: right;
     }
-
     .clock-time {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      font-family: monospace;
       color: #fff;
     }
-
     .clock-date {
-      font-size: 0.8rem;
-      color: var(--text-dim);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
     }
 
-    /* Grid layout */
-    .dashboard-grid {
+    main {
       flex: 1;
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1.4fr 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 16px;
-      padding: 16px;
-      height: calc(100vh - 64px);
+      gap: 12px;
+      padding: 12px;
+      height: calc(100vh - 60px);
     }
 
     .panel {
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 6px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
 
-    .panel-header {
-      padding: 10px 16px;
-      font-size: 0.85rem;
+    .panel.map-panel {
+      grid-row: span 2;
+    }
+
+    .panel-title {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .badge {
+    .panel-title span.tag {
+      color: var(--muted);
       font-size: 0.7rem;
+      border: 1px solid var(--border);
       padding: 2px 6px;
       border-radius: 3px;
-      background: #1e293b;
-      color: var(--text-dim);
     }
 
     .panel-body {
       flex: 1;
-      padding: 16px;
+      padding: 14px;
       overflow-y: auto;
       position: relative;
     }
 
-    /* Kartor */
-    #weather-map {
+    #map {
       width: 100%;
       height: 100%;
     }
 
     .map-legend {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(11, 15, 25, 0.85);
-      padding: 6px 12px;
-      font-size: 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
+      bottom: 10px;
+      left: 10px;
       z-index: 1000;
-      color: var(--text-dim);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      line-height: 1.5;
     }
 
-    iframe.radar-frame {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .dot-rain { width: 10px; height: 10px; background: #00d2ff; border-radius: 2px; }
+    .dot-lightning { width: 10px; height: 10px; background: var(--yellow); border-radius: 50%; box-shadow: 0 0 6px var(--yellow); }
 
-    /* Väderstatistik */
-    .weather-readout {
+    /* Väderkort */
+    .metrics {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    .metric-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-color);
-      padding: 12px;
+    .metric-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 10px;
       border-radius: 4px;
     }
 
-    .metric-label {
-      font-size: 0.75rem;
-      color: var(--text-dim);
+    .metric-box .label {
+      font-size: 0.7rem;
+      color: var(--muted);
       text-transform: uppercase;
     }
 
-    .metric-value {
-      font-size: 1.8rem;
+    .metric-box .val {
+      font-size: 1.6rem;
       font-weight: 700;
-      color: #fff;
-      font-family: monospace;
-    }
-
-    .metric-sub {
-      font-size: 0.75rem;
-      color: var(--accent-blue);
       margin-top: 4px;
     }
 
-    /* Händelselistor */
-    .feed-list {
+    .metric-box .sub {
+      font-size: 0.75rem;
+      color: var(--blue);
+      margin-top: 2px;
+    }
+
+    /* Listor */
+    .feed {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .feed-item {
-      padding: 10px;
-      border-left: 3px solid var(--accent-blue);
-      background: rgba(255, 255, 255, 0.02);
+    .card {
+      background: rgba(255,255,255,0.02);
+      border-left: 4px solid var(--blue);
+      padding: 8px 12px;
       border-radius: 0 4px 4px 0;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
-    .feed-item.vma-alert {
-      border-left-color: var(--accent-red);
-      background: rgba(239, 68, 68, 0.1);
-    }
+    .card.alert { border-left-color: var(--red); background: rgba(239, 68, 68, 0.08); }
+    .card.traffic { border-left-color: var(--amber); }
 
-    .feed-item.traffic-warning {
-      border-left-color: var(--accent-amber);
-    }
-
-    .feed-header {
-      font-weight: 600;
-      margin-bottom: 4px;
+    .card-header {
       display: flex;
       justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 3px;
     }
 
-    .feed-time {
-      font-size: 0.75rem;
-      color: var(--text-dim);
+    .card-time {
+      color: var(--muted);
+      font-size: 0.7rem;
     }
 
-    .feed-desc {
+    .card-desc {
       color: #cbd5e1;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
-    .empty-state {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      font-style: italic;
+    .empty {
       text-align: center;
-      padding: 24px 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 20px 0;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="system-status">
-      <div class="live-dot"></div>
-      <span class="title">Kontrollrum – Jönköpings Län</span>
+    <div class="status-badge">
+      <div class="pulse-dot"></div>
+      Kontrollrum – Lägesbild Jönköpings Län
     </div>
-    <div class="clock-group">
+    <div class="clock">
       <div class="clock-time" id="clock-time">--:--:--</div>
-      <div class="clock-date" id="clock-date">Laddar datum...</div>
+      <div class="clock-date" id="clock-date">Hämtar tid...</div>
     </div>
   </header>
 
-  <main class="dashboard-grid">
-    <section class="panel" style="grid-row: span 2;">
-      <div class="panel-header">
-        <span>Nederbördsradar & Blixtobservationer</span>
-        <span class="badge" id="radar-time">Realtid</span>
+  <main>
+    <!-- Väder- och Blixtkarta -->
+    <div class="panel map-panel">
+      <div class="panel-title">
+        <span>Realtidskarta (Nederbördsradar + Blixt)</span>
+        <span class="tag" id="radar-status">Laddar radar...</span>
       </div>
-      <div class="panel-body" style="padding: 0;">
-        <div id="weather-map"></div>
-        <div class="map-legend">Radar: RainViewer API | Blixt: SMHI/OpenLayers</div>
+      <div class="panel-body" style="padding:0;">
+        <div id="map"></div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="dot-rain"></div> RainViewer Radar</div>
+          <div class="legend-item"><div class="dot-lightning"></div> Blitzortung Realtidsblixtar</div>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <section class="panel">
-      <div class="panel-header">
-        <span>Atmosfärsdata & VMA (Krisinformation)</span>
-        <span class="badge">Jönköping / Värnamo</span>
+    <!-- Väder & VMA -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>Meteorologi & Krisinfo (VMA)</span>
+        <span class="tag">Jönköping Län</span>
       </div>
       <div class="panel-body">
-        <div class="weather-readout">
-          <div class="metric-card">
-            <div class="metric-label">Temperatur</div>
-            <div class="metric-value" id="val-temp">--.-°C</div>
-            <div class="metric-sub" id="val-condition">Hämtar data...</div>
+        <div class="metrics">
+          <div class="metric-box">
+            <div class="label">Temperatur</div>
+            <div class="val" id="temp-val">--.-°C</div>
+            <div class="sub" id="wind-val">Vind: -- m/s</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-label">Relativ Luftfuktighet</div>
-            <div class="metric-value" id="val-humidity">--%</div>
-            <div class="metric-sub" id="val-dew">Daggpunkt: --°C</div>
+          <div class="metric-box">
+            <div class="label">Luftfuktighet</div>
+            <div class="val" id="hum-val">--%</div>
+            <div class="sub" id="press-val">Tryck: -- hPa</div>
           </div>
         </div>
 
-        <div class="panel-header" style="padding: 6px 0; margin-bottom: 8px; background: none;">
-          <span>Viktigt Meddelande till Allmänheten (VMA)</span>
+        <div style="font-size: 0.75rem; font-weight: bold; margin-bottom: 6px; color: var(--muted); text-transform: uppercase;">
+          Viktigt Meddelande till Allmänheten (VMA)
         </div>
-        <div class="feed-list" id="vma-feed">
-          <div class="empty-state">Inga aktiva VMA eller regionala larm för Jönköpings län.</div>
+        <div class="feed" id="vma-list">
+          <div class="empty">Kontrollerar VMA-status...</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="panel">
-      <div class="panel-header">
-        <span>Trafikhändelser (Jönköpings Län)</span>
-        <span class="badge" id="traffic-count">0 Aktiva</span>
+    <!-- Trafikmeddelanden -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>Trafikstörningar (SR P4 Jönköping)</span>
+        <span class="tag" id="traffic-count">0 Ärenden</span>
       </div>
       <div class="panel-body">
-        <div class="feed-list" id="traffic-feed">
-          <div class="empty-state">Hämtar aktuellt trafikläge...</div>
+        <div class="feed" id="traffic-list">
+          <div class="empty">Hämtar trafikstörningar...</div>
         </div>
       </div>
-    </section>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 1. Klocka & Datum
-    function updateClock() {
+    // 1. Klocka
+    function runClock() {
       const now = new Date();
       document.getElementById('clock-time').textContent = now.toLocaleTimeString('sv-SE', { hour12: false });
       document.getElementById('clock-date').textContent = now.toLocaleDateString('sv-SE', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
       }).toUpperCase();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(runClock, 1000);
+    runClock();
 
-    // 2. Karta: Leaflet med mörk baskarta + RainViewer radar
-    const map = L.map('weather-map', { zoomControl: false }).setView([57.45, 14.3], 8);
+    // 2. Karta över Jönköpings län
+    const map = L.map('map', { zoomControl: false }).setView([57.45, 14.3], 8);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      attribution: '&copy; CartoDB &copy; OpenStreetMap',
       subdomains: 'abcd',
-      maxZoom: 19
+      maxZoom: 18
     }).addTo(map);
 
-    let radarLayer = null;
+    // Blixtlager (Realtid från Blitzortungs globala overlay via Rainviewer/MeteoTiles)
+    const lightningLayer = L.tileLayer('https://tiles.blitzortung.org/tile.php?z={z}&x={x}&y={y}', {
+      opacity: 0.9,
+      zIndex: 500
+    }).addTo(map);
+
+    // Radar-lager (RainViewer)
+    let radarTileLayer = null;
     async function updateRadar() {
       try {
         const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
         const data = await res.json();
-        if (data.radar && data.radar.past && data.radar.past.length > 0) {
+        if (data && data.radar && data.radar.past && data.radar.past.length > 0) {
           const latest = data.radar.past[data.radar.past.length - 1];
-          if (radarLayer) map.removeLayer(radarLayer);
-          radarLayer = L.tileLayer(`${data.host}${latest.path}/256/{z}/{x}/{y}/2/1_1.png`, {
-            opacity: 0.65
+          if (radarTileLayer) map.removeLayer(radarTileLayer);
+          radarTileLayer = L.tileLayer(`${data.host}${latest.path}/256/{z}/{x}/{y}/2/1_1.png`, {
+            opacity: 0.7,
+            zIndex: 400
           }).addTo(map);
-          
-          const radarDate = new Date(latest.time * 1000);
-          document.getElementById('radar-time').textContent = `Radar: ${radarDate.toLocaleTimeString('sv-SE')}`;
+          const t = new Date(latest.time * 1000);
+          document.getElementById('radar-status').textContent = `Radar: ${t.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})}`;
         }
-      } catch (err) {
-        console.error("Kunde inte hämta radardata:", err);
+      } catch (e) {
+        document.getElementById('radar-status').textContent = 'Radar: Ej tillgänglig';
       }
     }
     updateRadar();
-    setInterval(updateRadar, 300000); // Var 5:e minut
+    setInterval(updateRadar, 300000); // 5 min
 
-    // 3. SMHI Öppet API: Väder & Luftfuktighet (Station Värnamo/Jönköping: lat 57.18, lon 14.04)
-    async function fetchWeatherData() {
+    // 3. Väderdata & Luftfuktighet (Open-Meteo direkt mot Jönköpings koordinater)
+    async function updateWeather() {
       try {
-        const url = 'https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/14.04/lat/57.18/data.json';
+        // Koordinater: Jönköping (57.78, 14.16)
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=57.78&longitude=14.16&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m&wind_speed_unit=ms';
         const res = await fetch(url);
         const data = await res.json();
-        const current = data.timeSeries[0].parameters;
+        const c = data.current;
 
-        const temp = current.find(p => p.name === 't')?.values[0];
-        const humidity = current.find(p => p.name === 'r')?.values[0];
-        const wsymb = current.find(p => p.name === 'Wsymb2')?.values[0];
-
-        const weatherTypes = {
-          1: 'Klart', 2: 'Lätt molnighet', 3: 'Halvklart', 4: 'Molnigt',
-          5: 'Mycket moln', 6: 'Mulnet', 7: 'Dimma', 8: 'Lätta regnskurar',
-          9: 'Måttliga regnskurar', 10: 'Kraftiga regnskurar', 11: 'Åskskurar',
-          18: 'Lätt regn', 19: 'Regn', 20: 'Kraftigt regn', 21: 'Åska'
-        };
-
-        if (temp !== undefined) document.getElementById('val-temp').textContent = `${temp.toFixed(1)}°C`;
-        if (humidity !== undefined) document.getElementById('val-humidity').textContent = `${humidity}%`;
-        if (wsymb !== undefined) document.getElementById('val-condition').textContent = weatherTypes[wsymb] || 'Växlande';
-        
-        // Approximativ daggpunkt
-        if (temp !== undefined && humidity !== undefined) {
-          const dew = temp - ((100 - humidity) / 5);
-          document.getElementById('val-dew').textContent = `Daggpunkt: ${dew.toFixed(1)}°C`;
-        }
-      } catch (err) {
-        console.error("Kunde inte hämta SMHI-data:", err);
+        document.getElementById('temp-val').textContent = `${c.temperature_2m.toFixed(1)}°C`;
+        document.getElementById('hum-val').textContent = `${c.relative_humidity_2m}%`;
+        document.getElementById('wind-val').textContent = `Vind: ${c.wind_speed_10m.toFixed(1)} m/s`;
+        document.getElementById('press-val').textContent = `Tryck: ${Math.round(c.surface_pressure)} hPa`;
+      } catch (e) {
+        console.error("Väderfel:", e);
       }
     }
-    fetchWeatherData();
-    setInterval(fetchWeatherData, 600000); // Var 10:e minut
+    updateWeather();
+    setInterval(updateWeather, 600000); // 10 min
 
-    // 4. Krisinformation API: VMA och lokala larm för Jönköpings län
-    async function fetchVMA() {
-      const container = document.getElementById('vma-feed');
+    // 4. Trafikhändelser: Sveriges Radio P4 Jönköping API
+    async function updateTraffic() {
+      const container = document.getElementById('traffic-list');
+      const counter = document.getElementById('traffic-count');
       try {
-        const res = await fetch('https://api.krisinformation.se/v3/news');
+        // trafficprogramid=208 är P4 Jönköping
+        const res = await fetch('https://api.sr.se/api/v2/traffic/messages?format=json&trafficprogramid=208&size=6');
         const data = await res.json();
-        
-        // Filtrera på Jönköping eller nationella VMA
-        const filtered = data.filter(item => {
-          const body = (item.Headline + " " + item.BodyText).toLowerCase();
-          return body.includes('jönköping') || body.includes('vma') || body.includes('viktigt meddelande');
-        });
+        const messages = data.messages || [];
 
-        if (filtered.length === 0) {
-          container.innerHTML = `<div class="empty-state">Inga aktiva VMA för länet. Normalläge.</div>`;
+        counter.textContent = `${messages.length} Aktiva`;
+
+        if (messages.length === 0) {
+          container.innerHTML = `<div class="empty">Inga pågående trafikstörningar rapporterade i länet.</div>`;
           return;
         }
 
-        container.innerHTML = filtered.slice(0, 3).map(item => `
-          <div class="feed-item vma-alert">
-            <div class="feed-header">
-              <span>${item.Headline}</span>
-              <span class="feed-time">${new Date(item.Published).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})}</span>
+        container.innerHTML = messages.map(msg => {
+          let timeStr = "";
+          if (msg.createddate) {
+            const timestamp = parseInt(msg.createddate.replace(/\/Date\((\d+)\)\//, '$1'), 10);
+            timeStr = !isNaN(timestamp) ? new Date(timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : "";
+          }
+
+          return `
+            <div class="card traffic">
+              <div class="card-header">
+                <span>${msg.title}</span>
+                <span class="card-time">${timeStr}</span>
+              </div>
+              <div class="card-desc">${msg.description}</div>
             </div>
-            <div class="feed-desc">${item.PushMessage || item.BodyText.
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="empty">Kunde inte ansluta till trafikdatabasen.</div>`;
+      }
+    }
+    updateTraffic();
+    setInterval(updateTraffic, 120000); // 2 min
+
+    // 5. Krisinformation / VMA (CORS-säker via rss2json)
+    async function updateVMA() {
+      const container = document.getElementById('vma-list');
+      try {
+        const feedUrl = encodeURIComponent('https://api.krisinformation.se/v1/feed?format=rss');
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feedUrl}`);
+        const data = await res.json();
+
+        if (!data.items || data.items.length === 0) {
+          container.innerHTML = `<div class="empty">Inga aktiva larm. Normalläge i länet.</div>`;
+          return;
+        }
+
+        // Filtrera på VMA eller Jönköpings län
+        const vmaAlerts = data.items.filter(item => {
+          const text = (item.title + " " + item.description).toLowerCase();
+          return text.includes('vma') || text.includes('viktigt meddelande') || text.includes('jönköping');
+        });
+
+        if (vmaAlerts.length === 0) {
+          container.innerHTML = `<div class="empty">Inga aktiva larm. Normalläge i länet.</div>`;
+          return;
+        }
+
+        container.innerHTML = vmaAlerts.map(alert => `
+          <div class="card alert">
+            <div class="card-header">
+              <span>${alert.title}</span>
+              <span class="card-time">${new Date(alert.pubDate).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="card-desc">${alert.description.substring(0, 160)}...</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="empty">Inga aktiva VMA (kunde ej nå RSS-proxy).</div>`;
+      }
+    }
+    updateVMA();
+    setInterval(updateVMA, 60000); // 1 min
+  </script>
+</body>
+</html>
