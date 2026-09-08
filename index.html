@@ -197,10 +197,10 @@
     }
     .vma-panel.active .vma-status-tag { background: var(--alert-red); color: #fff; }
 
-    /* EGNA RUTOR FÖR POLIS, NYHETER & TRAFIK */
+    /* Moduler */
     .section-panel {
       flex: 1;
-      min-height: 135px;
+      min-height: 140px;
       display: flex;
       flex-direction: column;
     }
@@ -247,7 +247,7 @@
     }
     .feed-node.traffic {
       background: rgba(245, 158, 11, 0.04);
-      border: 1px solid rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.25);
       border-left: 3px solid var(--alert-yellow);
     }
 
@@ -356,7 +356,7 @@
         </div>
       </div>
 
-      <!-- Polis -->
+      <!-- 1. Polis -->
       <div class="panel section-panel police-box">
         <div class="panel-header">
           <div class="header-police">
@@ -370,7 +370,7 @@
         </div>
       </div>
 
-      <!-- Lokala Nyheter -->
+      <!-- 2. Lokala Nyheter -->
       <div class="panel section-panel news-box">
         <div class="panel-header">
           <div class="header-news">
@@ -384,17 +384,17 @@
         </div>
       </div>
 
-      <!-- Trafik -->
+      <!-- 3. Trafik: SR P4 Jönköping (Direktflöde) -->
       <div class="panel section-panel traffic-box">
         <div class="panel-header">
           <div class="header-traffic">
             <span>⚠</span>
-            <span>Trafikavvikelser (Län 06)</span>
+            <span>Trafikläget Jönköpings Län</span>
           </div>
           <span style="font-family: ui-monospace, monospace; font-size: 0.65rem; color: var(--text-muted);" id="traffic-counter">0 STÖRNINGAR</span>
         </div>
         <div class="feed-container" id="traffic-feed">
-          <div style="font-size:0.75rem; color:var(--text-muted);">Söker trafikläget...</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">Hämtar trafikstörningar...</div>
         </div>
       </div>
 
@@ -474,7 +474,7 @@
           btn.textContent = "Push På";
           btn.classList.add('enabled');
           new Notification("FTE Kontrollrum", { 
-            body: "Pushnotiser aktiverade för Polis och Nyheter i Jönköpings län."
+            body: "Pushnotiser aktiverade för Polis, Nyheter och Trafik i Jönköpings län."
           });
         }
       });
@@ -562,51 +562,52 @@
       }
     }
 
-    /* 3. TRAFIKVERKET (LÄN 06) */
+    /* 3. TRAFIKMEDDELANDEN: SVERIGES RADIO P4 JÖNKÖPING (Realtid & Öppet API) */
     async function fetchTraffic() {
       const container = document.getElementById('traffic-feed');
       const counter = document.getElementById('traffic-counter');
-      const xmlPayload = `
-        <REQUEST>
-          <LOGIN authenticationkey="5d4f134267254589a1fbbd09793108c9" />
-          <QUERY objecttype="Situation" schemaversion="1.5" limit="6">
-            <FILTER><EQ name="Deviation.CountyNo" value="6" /></FILTER>
-            <INCLUDE>Deviation.Header</INCLUDE>
-            <INCLUDE>Deviation.Message</INCLUDE>
-            <INCLUDE>Deviation.RoadNumber</INCLUDE>
-          </QUERY>
-        </REQUEST>`;
 
       try {
-        const res = await fetch('https://api.trafikinfo.trafikverket.se/v2/data.json', {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/xml' },
-          body: xmlPayload
+        // Hämtar direkt från P4 Jönköping trafikflöde
+        const res = await fetch('https://api.sr.se/api/v2/traffic/messages?trafficareaname=J%C3%B6nk%C3%B6ping&format=json&size=20');
+        const data = await res.json();
+        const allMessages = data.messages || [];
+
+        // Kommuner och orter i Jönköpings län för att filtrera bort irrelevanta riksmeddelanden
+        const jlLocations = [
+          'jönköping', 'värnamo', 'nässjö', 'vetlanda', 'tranås', 'eksjö', 
+          'gislaved', 'vaggeryd', 'habo', 'mullsjö', 'sävsjö', 'gnosjö', 
+          'aneby', 'huskvarna', 'skillingaryd', 'gränna', 'bankeryd', 
+          'smålandsstenar', 'taberg', 'reftele', 'bredaryd', 'forsheda', 'bor'
+        ];
+
+        // Strikt filtrering: Måste tillhöra Jönköping eller nämna orter i länet
+        const localTraffic = allMessages.filter(msg => {
+          const area = (msg.trafficarea && msg.trafficarea.name) ? msg.trafficarea.name.toLowerCase() : '';
+          const fullText = `${msg.title || ''} ${msg.description || ''} ${msg.exactlocation || ''}`.toLowerCase();
+          
+          if (area.includes('jönköping')) return true;
+          return jlLocations.some(loc => fullText.includes(loc));
         });
-        const json = await res.json();
-        const situations = json.RESPONSE?.RESULT?.[0]?.Situation || [];
 
-        const deviations = [];
-        situations.forEach(s => {
-          if (Array.isArray(s.Deviation)) deviations.push(...s.Deviation);
-          else if (s.Deviation) deviations.push(s.Deviation);
-        });
+        counter.textContent = `${localTraffic.length} STÖRNINGAR`;
 
-        counter.textContent = `${deviations.length} HÄNDELSER`;
-
-        if (deviations.length === 0) {
-          container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:0.2rem 0;">Normal framkomlighet i länet.</div>';
+        if (localTraffic.length === 0) {
+          container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:0.2rem 0;">Inga aktiva trafikstörningar i länet just nu.</div>';
           return;
         }
 
-        container.innerHTML = deviations.slice(0, 3).map(d => `
-          <div class="feed-node traffic">
-            <div class="feed-title">${d.RoadNumber ? 'VÄG ' + d.RoadNumber + ' // ' : ''}${d.Header || 'Avvikelse'}</div>
-            <div class="feed-msg">${d.Message || 'Ingen ytterligare rapport.'}</div>
-          </div>
+        container.innerHTML = localTraffic.slice(0, 4).map(msg => `
+          <a href="https://sverigesradio.se/trafik" target="_blank" rel="noopener noreferrer" class="feed-node traffic">
+            <div class="feed-title">
+              <span>${msg.title}</span>
+              <span style="font-size:0.65rem; opacity:0.6;">↗</span>
+            </div>
+            <div class="feed-msg">${msg.description || 'Ingen detaljrapport.'}</div>
+          </a>
         `).join('');
-      } catch (e) {
-        container.innerHTML = '<div style="font-size:0.75rem; color:var(--alert-red);">Kontaktfel mot Trafikverket.</div>';
+      } catch (err) {
+        container.innerHTML = '<div style="font-size:0.75rem; color:var(--alert-red);">Kunde inte hämta trafikflödet just nu.</div>';
       }
     }
 
@@ -658,7 +659,7 @@
     setInterval(fetchWeather, 10 * 60 * 1000);
     setInterval(fetchPolice, 2 * 60 * 1000);
     setInterval(fetchNews, 4 * 60 * 1000);
-    setInterval(fetchTraffic, 2 * 60 * 1000);
+    setInterval(fetchTraffic, 2 * 60 * 1000); // Trafiken hämtas varannan minut
     setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
