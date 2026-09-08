@@ -104,7 +104,7 @@
       background: rgba(0, 0, 0, 0.25);
     }
 
-    /* VÄNSTER KOLUMN: Rullbar vid behov med fasta sektioner */
+    /* VÄNSTER KOLUMN */
     .telemetry-column {
       display: flex;
       flex-direction: column;
@@ -318,7 +318,7 @@
   <!-- Huvudgrid -->
   <main class="main-grid">
 
-    <!-- Kolumn 1: Alla telemetrier & tre separata moduler -->
+    <!-- Kolumn 1: Telemetri & Separata Moduler -->
     <div class="telemetry-column">
 
       <!-- Väder -->
@@ -356,7 +356,7 @@
         </div>
       </div>
 
-      <!-- 1. EGEN RUTA: POLISEN JÖNKÖPINGS LÄN -->
+      <!-- Polis -->
       <div class="panel section-panel police-box">
         <div class="panel-header">
           <div class="header-police">
@@ -370,7 +370,7 @@
         </div>
       </div>
 
-      <!-- 2. EGEN RUTA: LOKALA NYHETER (VÄRNAMO / LÄNET) -->
+      <!-- Lokala Nyheter -->
       <div class="panel section-panel news-box">
         <div class="panel-header">
           <div class="header-news">
@@ -384,7 +384,7 @@
         </div>
       </div>
 
-      <!-- 3. EGEN RUTA: TRAFIKAVVIKELSER (LÄN 06) -->
+      <!-- Trafik -->
       <div class="panel section-panel traffic-box">
         <div class="panel-header">
           <div class="header-traffic">
@@ -400,25 +400,25 @@
 
     </div>
 
-    <!-- Kolumn 2: Satellitkarta Regn -->
+    <!-- Kolumn 2: Satellitkarta Regn (Zoom 5.5) -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SATELLIT // REGNRADAR</div>
+        <div class="map-tag">SATELLIT // REGNRADAR (ZOOM 5.5)</div>
         <iframe 
           id="radar-frame"
-          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=5&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=5.5&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
           loading="lazy">
         </iframe>
       </div>
     </div>
 
-    <!-- Kolumn 3: Satellitkarta Åska -->
+    <!-- Kolumn 3: Satellitkarta Åska (Zoom 5.5) -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA</div>
+        <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA (ZOOM 5.5)</div>
         <iframe 
           id="lightning-frame"
-          src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#5/57.186/14.040" 
+          src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#5.5/57.186/14.040" 
           loading="lazy">
         </iframe>
       </div>
