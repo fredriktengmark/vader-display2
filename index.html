@@ -249,19 +249,40 @@
       padding: 0.5rem;
       border-radius: 4px;
       font-size: 0.8rem;
+      text-decoration: none;
+      display: block;
+      color: inherit;
     }
     .feed-node.police {
       background: rgba(37, 99, 235, 0.05);
       border: 1px solid rgba(59, 130, 246, 0.2);
       border-left: 3px solid #3b82f6;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .feed-node.police:hover {
+      background: rgba(37, 99, 235, 0.15);
+      border-color: rgba(96, 165, 250, 0.5);
+      transform: translateX(2px);
     }
     .feed-node.traffic {
       background: rgba(245, 158, 11, 0.03);
       border: 1px solid rgba(245, 158, 11, 0.2);
       border-left: 3px solid var(--alert-yellow);
     }
-    .feed-title { font-weight: 700; margin-bottom: 0.15rem; }
+    .feed-title {
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .feed-node.police .feed-title { color: #93c5fd; }
+    .feed-node.police .link-hint {
+      font-size: 0.7rem;
+      color: #60a5fa;
+      opacity: 0.7;
+    }
     .feed-node.traffic .feed-title { color: var(--alert-yellow); }
     .feed-msg { color: #cbd5e1; font-size: 0.75rem; line-height: 1.25; }
 
@@ -341,7 +362,7 @@
         </div>
       </div>
 
-      <!-- Polis (Blå sektion med Notiser) -->
+      <!-- Polis (Klickbara rader + Pushnotiser) -->
       <div class="panel police-panel">
         <div class="panel-header">
           <div class="police-header-text">
@@ -355,7 +376,7 @@
         </div>
       </div>
 
-      <!-- Trafik (Gul sektion) -->
+      <!-- Trafik -->
       <div class="panel traffic-panel">
         <div class="panel-header">
           <div class="traffic-header-text">
@@ -445,12 +466,18 @@
           const btn = document.getElementById('btn-push');
           btn.textContent = "Notiser På";
           btn.classList.add('enabled');
-          new Notification("FTE Kontrollrum", { body: "Pushnotiser för Polisen i Jönköpings län är nu aktiverade." });
+          const testNotice = new Notification("FTE Kontrollrum", { 
+            body: "Pushnotiser för Polisen i Jönköpings län är aktiverade. Klicka för att testa länken.",
+            icon: "https://polisen.se/Static/images/police-badge.svg"
+          });
+          testNotice.onclick = () => {
+            window.open("https://polisen.se/aktuellt/polisens-nyheter/?l=J%C3%B6nk%C3%B6pings%20l%C3%A4n", "_blank");
+          };
         }
       });
     }
 
-    /* Polisen API: Strikt Jönköpings län */
+    /* Polisen API: Klickbara artiklar och notiser */
     async function fetchPoliceEvents() {
       const feed = document.getElementById('police-feed');
       try {
@@ -462,25 +489,41 @@
           return;
         }
 
-        // Identifiera och skicka pushnotis för helt nya larm
+        // Identifiera och skicka klickbar pushnotis för nya larm
         events.forEach(ev => {
+          const articleUrl = `https://polisen.se${ev.url}`;
+          
           if (knownPoliceEventIds.size > 0 && !knownPoliceEventIds.has(ev.id)) {
             if (pushEnabled && Notification.permission === "granted") {
-              new Notification(`POLIS // ${ev.type} (${ev.location.name})`, {
-                body: ev.summary,
-                icon: "https://polisen.se/Static/images/police-badge.svg"
+              const notif = new Notification(`POLIS // ${ev.type} (${ev.location.name})`, {
+                body: `${ev.summary}\n(Klicka för att läsa rapporten)`,
+                icon: "https://polisen.se/Static/images/police-badge.svg",
+                data: { url: articleUrl }
               });
+
+              // Gör pushnotisen klickbar
+              notif.onclick = function(event) {
+                event.preventDefault();
+                window.open(articleUrl, '_blank');
+              };
             }
           }
           knownPoliceEventIds.add(ev.id);
         });
 
-        feed.innerHTML = events.slice(0, 4).map(ev => `
-          <div class="feed-node police">
-            <div class="feed-title">${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})</div>
-            <div class="feed-msg">${ev.summary}</div>
-          </div>
-        `).join('');
+        // Rendera klickbara händelsekort i vänsterpanelen
+        feed.innerHTML = events.slice(0, 4).map(ev => {
+          const fullUrl = `https://polisen.se${ev.url}`;
+          return `
+            <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="feed-node police">
+              <div class="feed-title">
+                <span>${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})</span>
+                <span class="link-hint">↗</span>
+              </div>
+              <div class="feed-msg">${ev.summary}</div>
+            </a>
+          `;
+        }).join('');
       } catch (err) {
         feed.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem;">Polisdata uppdateras...</div>';
       }
@@ -593,7 +636,7 @@
     fetchTraffic();
     fetchVMA();
 
-    // Återställ knappstatus om sidan redan har tillåtelse
+    // Kontrollera om behörighet redan finns
     if ("Notification" in window && Notification.permission === "granted") {
       pushEnabled = true;
       const btn = document.getElementById('btn-push');
