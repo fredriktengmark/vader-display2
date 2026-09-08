@@ -12,7 +12,9 @@
       --text-main: #f8fafc;
       --text-muted: #64748b;
       --accent-blue: #38bdf8;
-      --police-blue: #2563eb;
+      --police-blue: #3b82f6;
+      --region-teal: #14b8a6;
+      --news-purple: #a855f7;
       --alert-red: #ef4444;
       --alert-yellow: #f59e0b;
       --status-green: #22c55e;
@@ -32,7 +34,7 @@
       gap: 0.75rem;
     }
 
-    /* Toppbanner: Status & Extra stor Klocka */
+    /* Toppbanner */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -40,11 +42,11 @@
       background: var(--panel-bg);
       border: 1px solid var(--border-color);
       border-left: 5px solid var(--alert-red);
-      padding: 0.75rem 1.5rem;
+      padding: 0.6rem 1.5rem;
       border-radius: 6px;
     }
     .top-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 900;
       letter-spacing: 2px;
       color: var(--alert-red);
@@ -56,7 +58,7 @@
     }
     .top-clock {
       font-family: ui-monospace, "SF Mono", "Cascadia Code", monospace;
-      font-size: 2.6rem;
+      font-size: 2.4rem;
       font-weight: 800;
       line-height: 1;
       color: #fff;
@@ -66,15 +68,15 @@
     }
     .top-date {
       color: #94a3b8;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 600;
       text-transform: capitalize;
     }
 
-    /* Huvudcontainer */
+    /* Huvudgrid */
     .main-grid {
       display: grid;
-      grid-template-columns: 420px 1fr 1fr;
+      grid-template-columns: 440px 1fr 1fr;
       gap: 0.75rem;
       flex: 1;
       min-height: 0;
@@ -103,21 +105,21 @@
       background: rgba(0, 0, 0, 0.2);
     }
 
-    /* VÄNSTER KOLUMN: Status & Varningar */
+    /* VÄNSTER KOLUMN */
     .telemetry-column {
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
       height: 100%;
-      overflow-y: auto;
+      min-height: 0;
     }
 
-    /* Väderkort */
+    /* Väder */
     .weather-card {
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 0.9rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
     .weather-main {
       display: flex;
@@ -126,13 +128,13 @@
     }
     .temp-val {
       font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 3rem;
+      font-size: 2.8rem;
       font-weight: 900;
       line-height: 1;
       color: #fff;
     }
     .condition-val {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--text-muted);
       text-align: right;
       font-weight: 600;
@@ -145,7 +147,7 @@
     .metric-box {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
-      padding: 0.4rem;
+      padding: 0.35rem 0.5rem;
       border-radius: 4px;
     }
     .metric-box label {
@@ -179,10 +181,10 @@
       50% { box-shadow: inset 0 0 25px rgba(239, 68, 68, 0.4); }
     }
     .vma-content {
-      padding: 0.6rem 0.85rem;
+      padding: 0.5rem 0.85rem;
       font-size: 0.8rem;
       color: #cbd5e1;
-      line-height: 1.3;
+      line-height: 1.25;
     }
     .vma-status-tag {
       font-family: ui-monospace, monospace;
@@ -195,48 +197,37 @@
     }
     .vma-panel.active .vma-status-tag { background: var(--alert-red); color: #fff; }
 
-    /* POLISNOTISER (BLÅTT) */
-    .police-panel {
-      border-top: 2px solid var(--police-blue);
+    /* MULTI-FEED SEKTION MED FLIKAR */
+    .multi-panel {
       flex: 1;
-      min-height: 130px;
-    }
-    .police-header-text {
-      color: #60a5fa;
       display: flex;
-      align-items: center;
-      gap: 0.4rem;
+      flex-direction: column;
+      min-height: 0;
     }
-    .push-toggle-btn {
-      background: #1e293b;
-      border: 1px solid #3b82f6;
-      color: #93c5fd;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 3px;
+    .feed-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
       cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
     }
-    .push-toggle-btn.enabled {
-      background: rgba(37, 99, 235, 0.3);
-      color: #60a5fa;
-      border-color: #2563eb;
-    }
+    .tab-btn.active.police { color: #60a5fa; border-color: var(--police-blue); background: rgba(59, 130, 246, 0.05); }
+    .tab-btn.active.region { color: #5eead4; border-color: var(--region-teal); background: rgba(20, 184, 166, 0.05); }
+    .tab-btn.active.news { color: #d8b4fe; border-color: var(--news-purple); background: rgba(168, 85, 247, 0.05); }
+    .tab-btn.active.traffic { color: var(--alert-yellow); border-color: var(--alert-yellow); background: rgba(245, 158, 11, 0.05); }
 
-    /* TRAFIK (GULT) */
-    .traffic-panel {
-      flex: 1;
-      border-top: 2px solid var(--alert-yellow);
-      min-height: 130px;
-    }
-    .traffic-header-text {
-      color: var(--alert-yellow);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    /* Gemensam list-feed */
     .feed-container {
       flex: 1;
       overflow-y: auto;
@@ -246,29 +237,22 @@
       gap: 0.5rem;
     }
     .feed-node {
-      padding: 0.5rem;
+      padding: 0.5rem 0.65rem;
       border-radius: 4px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-decoration: none;
       display: block;
       color: inherit;
-    }
-    .feed-node.police {
-      background: rgba(37, 99, 235, 0.05);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-left: 3px solid #3b82f6;
-      cursor: pointer;
       transition: all 0.2s ease;
     }
-    .feed-node.police:hover {
-      background: rgba(37, 99, 235, 0.15);
-      border-color: rgba(96, 165, 250, 0.5);
+    .feed-node.police { background: rgba(37, 99, 235, 0.04); border: 1px solid rgba(59, 130, 246, 0.2); border-left: 3px solid var(--police-blue); }
+    .feed-node.region { background: rgba(20, 184, 166, 0.04); border: 1px solid rgba(20, 184, 166, 0.2); border-left: 3px solid var(--region-teal); }
+    .feed-node.news { background: rgba(168, 85, 247, 0.04); border: 1px solid rgba(168, 85, 247, 0.2); border-left: 3px solid var(--news-purple); }
+    .feed-node.traffic { background: rgba(245, 158, 11, 0.04); border: 1px solid rgba(245, 158, 11, 0.2); border-left: 3px solid var(--alert-yellow); }
+
+    .feed-node:hover {
+      background: rgba(255, 255, 255, 0.05);
       transform: translateX(2px);
-    }
-    .feed-node.traffic {
-      background: rgba(245, 158, 11, 0.03);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      border-left: 3px solid var(--alert-yellow);
     }
     .feed-title {
       font-weight: 700;
@@ -278,13 +262,26 @@
       align-items: center;
     }
     .feed-node.police .feed-title { color: #93c5fd; }
-    .feed-node.police .link-hint {
-      font-size: 0.7rem;
-      color: #60a5fa;
-      opacity: 0.7;
-    }
+    .feed-node.region .feed-title { color: #5eead4; }
+    .feed-node.news .feed-title { color: #d8b4fe; }
     .feed-node.traffic .feed-title { color: var(--alert-yellow); }
-    .feed-msg { color: #cbd5e1; font-size: 0.75rem; line-height: 1.25; }
+    .feed-msg { color: #cbd5e1; font-size: 0.73rem; line-height: 1.25; }
+
+    .push-btn {
+      background: #1e293b;
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .push-btn.enabled {
+      background: rgba(37, 99, 235, 0.25);
+      color: #60a5fa;
+      border-color: #2563eb;
+    }
 
     /* KARTOR */
     .map-frame-wrapper { position: relative; height: 100%; width: 100%; }
@@ -309,7 +306,6 @@
 </head>
 <body>
 
-  <!-- Toppbanner -->
   <header class="top-bar">
     <div class="top-title">
       <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--alert-red); box-shadow:0 0 8px var(--alert-red);"></span>
@@ -321,10 +317,9 @@
     </div>
   </header>
 
-  <!-- Huvudvy -->
   <main class="main-grid">
 
-    <!-- Kolumn 1: Status & Händelser -->
+    <!-- Kolumn 1 -->
     <div class="telemetry-column">
 
       <!-- Väder -->
@@ -362,37 +357,28 @@
         </div>
       </div>
 
-      <!-- Polis (Klickbara rader + Pushnotiser) -->
-      <div class="panel police-panel">
+      <!-- Operativt flöde med flikar -->
+      <div class="panel multi-panel">
         <div class="panel-header">
-          <div class="police-header-text">
-            <span>🛡</span>
-            <span>Polisen Jönköpings Län</span>
-          </div>
-          <button id="btn-push" class="push-toggle-btn" onclick="requestNotificationAccess()">Aktivera Notiser</button>
+          <span>Operativt Larmflöde</span>
+          <button id="btn-push" class="push-btn" onclick="requestNotificationAccess()">Aktivera Push</button>
         </div>
-        <div class="feed-container" id="police-feed">
-          <div style="font-size:0.75rem; color:var(--text-muted);">Hämtar Polishändelser...</div>
-        </div>
-      </div>
 
-      <!-- Trafik -->
-      <div class="panel traffic-panel">
-        <div class="panel-header">
-          <div class="traffic-header-text">
-            <span>⚠</span>
-            <span>Trafik (Län 06)</span>
-          </div>
-          <span style="font-family: ui-monospace, monospace; font-size: 0.65rem; color: var(--text-muted);" id="traffic-counter">0 HÄNDELSER</span>
+        <div class="feed-tabs">
+          <button class="tab-btn active police" onclick="switchTab('police')">Polis</button>
+          <button class="tab-btn region" onclick="switchTab('region')">Region JL</button>
+          <button class="tab-btn news" onclick="switchTab('news')">Lokalnyheter</button>
+          <button class="tab-btn traffic" onclick="switchTab('traffic')">Trafik</button>
         </div>
-        <div class="feed-container" id="traffic-feed">
-          <div style="font-size:0.75rem; color:var(--text-muted);">Söker trafikläget...</div>
+
+        <div class="feed-container" id="active-feed">
+          <div style="font-size:0.75rem; color:var(--text-muted);">Initierar feed...</div>
         </div>
       </div>
 
     </div>
 
-    <!-- Kolumn 2: Satellitkarta Regn -->
+    <!-- Kolumn 2: Satellit Regn -->
     <div class="panel">
       <div class="map-frame-wrapper">
         <div class="map-tag">SATELLIT // REGNRADAR</div>
@@ -404,7 +390,7 @@
       </div>
     </div>
 
-    <!-- Kolumn 3: Satellitkarta Åska -->
+    <!-- Kolumn 3: Satellit Åska -->
     <div class="panel">
       <div class="map-frame-wrapper">
         <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA</div>
@@ -422,8 +408,17 @@
     const LAT = 57.1864;
     const LON = 14.0403;
 
-    let knownPoliceEventIds = new Set();
+    let currentTab = 'police';
+    let knownIds = new Set();
     let pushEnabled = false;
+
+    // Cache för data från flödena
+    const feedStore = {
+      police: [],
+      region: [],
+      news: [],
+      traffic: []
+    };
 
     const weatherCodes = {
       0: "Klart", 1: "Mestadels klart", 2: "Halvklart", 3: "Mulet",
@@ -454,92 +449,125 @@
       }
     }
 
-    /* Web-Push Behörighet */
     function requestNotificationAccess() {
       if (!("Notification" in window)) {
-        alert("Webbläsaren saknar stöd för skrivbordsnotiser.");
+        alert("Webbläsaren saknar stöd för pushnotiser.");
         return;
       }
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
+      Notification.requestPermission().then(perm => {
+        if (perm === "granted") {
           pushEnabled = true;
           const btn = document.getElementById('btn-push');
-          btn.textContent = "Notiser På";
+          btn.textContent = "Push På";
           btn.classList.add('enabled');
-          const testNotice = new Notification("FTE Kontrollrum", { 
-            body: "Pushnotiser för Polisen i Jönköpings län är aktiverade. Klicka för att testa länken.",
-            icon: "https://polisen.se/Static/images/police-badge.svg"
+          new Notification("FTE Kontrollrum", { 
+            body: "Pushnotiser aktiverade för Polis, Region och Nyheter i Jönköpings län."
           });
-          testNotice.onclick = () => {
-            window.open("https://polisen.se/aktuellt/polisens-nyheter/?l=J%C3%B6nk%C3%B6pings%20l%C3%A4n", "_blank");
-          };
         }
       });
     }
 
-    /* Polisen API: Klickbara artiklar och notiser */
-    async function fetchPoliceEvents() {
-      const feed = document.getElementById('police-feed');
-      try {
-        const res = await fetch('https://polisen.se/api/events?locationname=J%C3%B6nk%C3%B6pings%20l%C3%A4n');
-        const events = await res.json();
-
-        if (!events || events.length === 0) {
-          feed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Inga aktuella polishändelser inrapporterade.</div>';
-          return;
-        }
-
-        // Identifiera och skicka klickbar pushnotis för nya larm
-        events.forEach(ev => {
-          const articleUrl = `https://polisen.se${ev.url}`;
-          
-          if (knownPoliceEventIds.size > 0 && !knownPoliceEventIds.has(ev.id)) {
-            if (pushEnabled && Notification.permission === "granted") {
-              const notif = new Notification(`POLIS // ${ev.type} (${ev.location.name})`, {
-                body: `${ev.summary}\n(Klicka för att läsa rapporten)`,
-                icon: "https://polisen.se/Static/images/police-badge.svg",
-                data: { url: articleUrl }
-              });
-
-              // Gör pushnotisen klickbar
-              notif.onclick = function(event) {
-                event.preventDefault();
-                window.open(articleUrl, '_blank');
-              };
-            }
-          }
-          knownPoliceEventIds.add(ev.id);
+    function triggerPush(title, body, url) {
+      if (pushEnabled && Notification.permission === "granted") {
+        const notif = new Notification(title, {
+          body: body,
+          icon: "https://polisen.se/Static/images/police-badge.svg"
         });
-
-        // Rendera klickbara händelsekort i vänsterpanelen
-        feed.innerHTML = events.slice(0, 4).map(ev => {
-          const fullUrl = `https://polisen.se${ev.url}`;
-          return `
-            <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="feed-node police">
-              <div class="feed-title">
-                <span>${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})</span>
-                <span class="link-hint">↗</span>
-              </div>
-              <div class="feed-msg">${ev.summary}</div>
-            </a>
-          `;
-        }).join('');
-      } catch (err) {
-        feed.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem;">Polisdata uppdateras...</div>';
+        if (url) {
+          notif.onclick = () => { window.open(url, '_blank'); };
+        }
       }
     }
 
-    /* Trafikverket API: Strikt CountyNo 6 */
+    /* 1. POLISEN API */
+    async function fetchPolice() {
+      try {
+        const res = await fetch('https://polisen.se/api/events?locationname=J%C3%B6nk%C3%B6pings%20l%C3%A4n');
+        const events = await res.json();
+        
+        feedStore.police = events.slice(0, 8).map(ev => {
+          const id = 'pol_' + ev.id;
+          const url = `https://polisen.se${ev.url}`;
+          if (knownIds.size > 0 && !knownIds.has(id)) {
+            triggerPush(`POLIS // ${ev.type} (${ev.location.name})`, ev.summary, url);
+          }
+          knownIds.add(id);
+          return {
+            title: `${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})`,
+            msg: ev.summary,
+            url: url,
+            type: 'police'
+          };
+        });
+        if (currentTab === 'police') renderCurrentTab();
+      } catch (e) {
+        console.warn('Polis-fetch misslyckades');
+      }
+    }
+
+    /* 2. REGION JÖNKÖPINGS LÄN (Via TT Pressflöde) */
+    async function fetchRegion() {
+      try {
+        const feedUrl = encodeURIComponent('https://via.tt.se/rss/pressmeddelanden/3236484/region-jonkopings-lan');
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feedUrl}`);
+        const data = await res.json();
+        
+        if (data.items) {
+          feedStore.region = data.items.slice(0, 8).map(item => {
+            const id = 'reg_' + item.guid;
+            if (knownIds.size > 0 && !knownIds.has(id)) {
+              triggerPush(`REGION JÖNKÖPINGS LÄN`, item.title, item.link);
+            }
+            knownIds.add(id);
+            return {
+              title: item.title,
+              msg: item.description.replace(/<[^>]*>?/gm, '').slice(0, 140) + '...',
+              url: item.link,
+              type: 'region'
+            };
+          });
+          if (currentTab === 'region') renderCurrentTab();
+        }
+      } catch (e) {
+        console.warn('Region-fetch misslyckades');
+      }
+    }
+
+    /* 3. LOKALNYHETER (SVT Jönköping / Värnamo) */
+    async function fetchNews() {
+      try {
+        const feedUrl = encodeURIComponent('https://www.svt.se/nyheter/lokalt/jonkoping/rss.xml');
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feedUrl}`);
+        const data = await res.json();
+
+        if (data.items) {
+          feedStore.news = data.items.slice(0, 8).map(item => {
+            const id = 'news_' + item.guid;
+            if (knownIds.size > 0 && !knownIds.has(id)) {
+              triggerPush(`NYHET // JÖNKÖPINGS LÄN`, item.title, item.link);
+            }
+            knownIds.add(id);
+            return {
+              title: item.title,
+              msg: item.description.replace(/<[^>]*>?/gm, '').slice(0, 140) + '...',
+              url: item.link,
+              type: 'news'
+            };
+          });
+          if (currentTab === 'news') renderCurrentTab();
+        }
+      } catch (e) {
+        console.warn('News-fetch misslyckades');
+      }
+    }
+
+    /* 4. TRAFIKVERKET API (Län 06) */
     async function fetchTraffic() {
-      const feed = document.getElementById('traffic-feed');
-      const counter = document.getElementById('traffic-counter');
       const xmlPayload = `
         <REQUEST>
           <LOGIN authenticationkey="5d4f134267254589a1fbbd09793108c9" />
-          <QUERY objecttype="Situation" schemaversion="1.5" limit="5">
-            <FILTER>
-              <EQ name="Deviation.CountyNo" value="6" />
-            </FILTER>
+          <QUERY objecttype="Situation" schemaversion="1.5" limit="8">
+            <FILTER><EQ name="Deviation.CountyNo" value="6" /></FILTER>
             <INCLUDE>Deviation.Header</INCLUDE>
             <INCLUDE>Deviation.Message</INCLUDE>
             <INCLUDE>Deviation.RoadNumber</INCLUDE>
@@ -561,25 +589,19 @@
           else if (s.Deviation) deviations.push(s.Deviation);
         });
 
-        counter.textContent = `${deviations.length} HÄNDELSER`;
-
-        if (deviations.length === 0) {
-          feed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Normal framkomlighet i länet.</div>';
-          return;
-        }
-
-        feed.innerHTML = deviations.slice(0, 4).map(d => `
-          <div class="feed-node traffic">
-            <div class="feed-title">${d.RoadNumber ? 'VÄG ' + d.RoadNumber + ' // ' : ''}${d.Header || 'Avvikelse'}</div>
-            <div class="feed-msg">${d.Message || 'Ingen detaljrapport.'}</div>
-          </div>
-        `).join('');
-      } catch (err) {
-        feed.innerHTML = '<div style="color:var(--alert-red); font-size:0.75rem;">Kontaktfel mot Trafikverket.</div>';
+        feedStore.traffic = deviations.slice(0, 8).map(d => ({
+          title: (d.RoadNumber ? 'VÄG ' + d.RoadNumber + ' // ' : '') + (d.Header || 'Avvikelse'),
+          msg: d.Message || 'Ingen ytterligare rapport.',
+          url: 'https://trafiken.nu',
+          type: 'traffic'
+        }));
+        if (currentTab === 'traffic') renderCurrentTab();
+      } catch (e) {
+        console.warn('Trafik-fetch misslyckades');
       }
     }
 
-    /* VMA / Krisinformation */
+    /* VMA */
     async function fetchVMA() {
       const panel = document.getElementById('vma-panel');
       const tag = document.getElementById('vma-tag');
@@ -587,7 +609,6 @@
 
       try {
         const res = await fetch('https://api.krisinformation.se/v3/vmas');
-        if (!res.ok) throw new Error('Status ' + res.status);
         const list = await res.json();
 
         const vmaMatch = list.find(item => {
@@ -602,6 +623,7 @@
             <strong style="color:var(--alert-red); display:block; margin-bottom:4px;">${vmaMatch.Headline || 'VIKTIGT MEDDELANDE'}</strong>
             <span>${vmaMatch.PushMessage || vmaMatch.BodyText}</span>
           `;
+          triggerPush(`🚨 VMA UTFÄRDAT`, vmaMatch.Headline || vmaMatch.PushMessage, 'https://krisinformation.se');
         } else {
           panel.classList.remove('active');
           tag.textContent = 'NORMAL';
@@ -614,6 +636,34 @@
       }
     }
 
+    /* Flikbyte & Rendrering */
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.tab-btn.${tab}`).classList.add('active');
+      renderCurrentTab();
+    }
+
+    function renderCurrentTab() {
+      const container = document.getElementById('active-feed');
+      const list = feedStore[currentTab] || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:0.5rem 0;">Hämtar data / Inga aktiva händelser...</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="feed-node ${item.type}">
+          <div class="feed-title">
+            <span>${item.title}</span>
+            <span style="font-size:0.65rem; opacity:0.6;">↗</span>
+          </div>
+          <div class="feed-msg">${item.msg}</div>
+        </a>
+      `).join('');
+    }
+
     function refreshMaps() {
       const radar = document.getElementById('radar-frame');
       const lightning = document.getElementById('lightning-frame');
@@ -624,23 +674,26 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
-    setInterval(fetchPoliceEvents, 2 * 60 * 1000); // Polisen kontrolleras varannan minut
+    setInterval(fetchPolice, 2 * 60 * 1000);
+    setInterval(fetchRegion, 4 * 60 * 1000);
+    setInterval(fetchNews, 5 * 60 * 1000);
     setInterval(fetchTraffic, 2 * 60 * 1000);
     setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
-    // Initial start
+    // Uppstart
     updateClock();
     fetchWeather();
-    fetchPoliceEvents();
+    fetchPolice();
+    fetchRegion();
+    fetchNews();
     fetchTraffic();
     fetchVMA();
 
-    // Kontrollera om behörighet redan finns
     if ("Notification" in window && Notification.permission === "granted") {
       pushEnabled = true;
       const btn = document.getElementById('btn-push');
-      btn.textContent = "Notiser På";
+      btn.textContent = "Push På";
       btn.classList.add('enabled');
     }
   </script>
