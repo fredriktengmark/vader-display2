@@ -336,25 +336,25 @@
 
     </div>
 
-    <!-- Kolumn 2: Nederbördskarta -->
+    <!-- Kolumn 2: Satellit / Moln & Nederbörd -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">RADAR // REGN & SNÖ</div>
+        <div class="map-tag">SATELLIT // MOLN & VÄDERSYSTEM</div>
         <iframe 
           id="radar-frame"
-          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=satellite&product=satellite&level=surface&lat=57.186&lon=14.040" 
           loading="lazy">
         </iframe>
       </div>
     </div>
 
-    <!-- Kolumn 3: Åskradar -->
+    <!-- Kolumn 3: Satellit / Åskradar -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SENSORER // BLIXTAR REALTID</div>
+        <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA REALTID</div>
         <iframe 
           id="lightning-frame"
-          src="https://map.blitzortung.org/index.php?interactive=1#6.5/57.186/14.040" 
+          src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#6.5/57.186/14.040" 
           loading="lazy">
         </iframe>
       </div>
@@ -490,8 +490,8 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
-    setInterval(fetchTraffic, 2 * 60 * 1000);
-    setInterval(fetchVMA, 1 * 60 * 1000);
+    setInterval(fetchTraffic, 2 * 60 * 1000); // 2 min intervall
+    setInterval(fetchVMA, 1 * 60 * 1000);     // 1 min intervall
     setInterval(refreshMaps, 10 * 60 * 1000);
 
     // Initial körning
