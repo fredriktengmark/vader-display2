@@ -12,6 +12,7 @@
       --text-main: #f8fafc;
       --text-muted: #64748b;
       --accent-blue: #38bdf8;
+      --police-blue: #2563eb;
       --alert-red: #ef4444;
       --alert-yellow: #f59e0b;
       --status-green: #22c55e;
@@ -73,7 +74,7 @@
     /* Huvudcontainer */
     .main-grid {
       display: grid;
-      grid-template-columns: 380px 1fr 1fr;
+      grid-template-columns: 420px 1fr 1fr;
       gap: 0.75rem;
       flex: 1;
       min-height: 0;
@@ -90,7 +91,7 @@
       position: relative;
     }
     .panel-header {
-      padding: 0.6rem 0.85rem;
+      padding: 0.5rem 0.85rem;
       font-size: 0.75rem;
       font-weight: 800;
       letter-spacing: 1.5px;
@@ -106,16 +107,17 @@
     .telemetry-column {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.6rem;
       height: 100%;
+      overflow-y: auto;
     }
 
     /* Väderkort */
     .weather-card {
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.4rem;
     }
     .weather-main {
       display: flex;
@@ -124,13 +126,13 @@
     }
     .temp-val {
       font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 3.6rem;
+      font-size: 3rem;
       font-weight: 900;
       line-height: 1;
       color: #fff;
     }
     .condition-val {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--text-muted);
       text-align: right;
       font-weight: 600;
@@ -139,29 +141,28 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
-      margin-top: 0.25rem;
     }
     .metric-box {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
-      padding: 0.5rem;
+      padding: 0.4rem;
       border-radius: 4px;
     }
     .metric-box label {
       display: block;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--text-muted);
       letter-spacing: 1px;
       text-transform: uppercase;
     }
     .metric-box span {
       font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--accent-blue);
     }
 
-    /* VMA: RÖD STATUS */
+    /* VMA */
     .vma-panel {
       border: 1px solid var(--border-color);
       border-left: 4px solid var(--status-green);
@@ -178,30 +179,55 @@
       50% { box-shadow: inset 0 0 25px rgba(239, 68, 68, 0.4); }
     }
     .vma-content {
-      padding: 0.75rem;
-      font-size: 0.85rem;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
       color: #cbd5e1;
-      line-height: 1.35;
+      line-height: 1.3;
     }
     .vma-status-tag {
       font-family: ui-monospace, monospace;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 3px;
       background: rgba(34, 197, 94, 0.2);
       color: var(--status-green);
     }
-    .vma-panel.active .vma-status-tag {
-      background: var(--alert-red);
-      color: #fff;
+    .vma-panel.active .vma-status-tag { background: var(--alert-red); color: #fff; }
+
+    /* POLISNOTISER (BLÅTT) */
+    .police-panel {
+      border-top: 2px solid var(--police-blue);
+      flex: 1;
+      min-height: 130px;
+    }
+    .police-header-text {
+      color: #60a5fa;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .push-toggle-btn {
+      background: #1e293b;
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .push-toggle-btn.enabled {
+      background: rgba(37, 99, 235, 0.3);
+      color: #60a5fa;
+      border-color: #2563eb;
     }
 
-    /* TRAFIK: GUL / AMBER */
+    /* TRAFIK (GULT) */
     .traffic-panel {
       flex: 1;
       border-top: 2px solid var(--alert-yellow);
-      min-height: 0;
+      min-height: 130px;
     }
     .traffic-header-text {
       color: var(--alert-yellow);
@@ -209,39 +235,38 @@
       align-items: center;
       gap: 0.4rem;
     }
-    .traffic-feed {
+
+    /* Gemensam list-feed */
+    .feed-container {
       flex: 1;
       overflow-y: auto;
-      padding: 0.75rem;
+      padding: 0.6rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.5rem;
     }
-    .traffic-node {
+    .feed-node {
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .feed-node.police {
+      background: rgba(37, 99, 235, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-left: 3px solid #3b82f6;
+    }
+    .feed-node.traffic {
       background: rgba(245, 158, 11, 0.03);
       border: 1px solid rgba(245, 158, 11, 0.2);
       border-left: 3px solid var(--alert-yellow);
-      padding: 0.6rem;
-      border-radius: 4px;
     }
-    .traffic-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--alert-yellow);
-      margin-bottom: 0.2rem;
-    }
-    .traffic-msg {
-      font-size: 0.8rem;
-      color: #cbd5e1;
-      line-height: 1.3;
-    }
+    .feed-title { font-weight: 700; margin-bottom: 0.15rem; }
+    .feed-node.police .feed-title { color: #93c5fd; }
+    .feed-node.traffic .feed-title { color: var(--alert-yellow); }
+    .feed-msg { color: #cbd5e1; font-size: 0.75rem; line-height: 1.25; }
 
     /* KARTOR */
-    .map-frame-wrapper {
-      position: relative;
-      height: 100%;
-      width: 100%;
-    }
+    .map-frame-wrapper { position: relative; height: 100%; width: 100%; }
     .map-tag {
       position: absolute;
       top: 8px;
@@ -258,16 +283,12 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+    iframe { width: 100%; height: 100%; border: none; }
   </style>
 </head>
 <body>
 
-  <!-- Topprad med systemstatus och förstorad klocka -->
+  <!-- Toppbanner -->
   <header class="top-bar">
     <div class="top-title">
       <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--alert-red); box-shadow:0 0 8px var(--alert-red);"></span>
@@ -282,13 +303,13 @@
   <!-- Huvudvy -->
   <main class="main-grid">
 
-    <!-- Kolumn 1: Telemetri, VMA och Trafik -->
+    <!-- Kolumn 1: Status & Händelser -->
     <div class="telemetry-column">
 
       <!-- Väder -->
       <div class="panel">
         <div class="panel-header">
-          <span>Lokal Vädertelemetri</span>
+          <span>Lokal Telemetri</span>
           <span style="color:var(--text-muted);">VÄRNAMO</span>
         </div>
         <div class="weather-card">
@@ -298,25 +319,39 @@
           </div>
           <div class="meta-metrics">
             <div class="metric-box">
-              <label>Vindhastighet</label>
+              <label>Vind</label>
               <span id="wind">-- m/s</span>
             </div>
             <div class="metric-box">
-              <label>Luftfuktighet</label>
+              <label>Fuktighet</label>
               <span id="humidity">-- %</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- VMA (Röd sektion) -->
+      <!-- VMA -->
       <div class="panel vma-panel" id="vma-panel">
         <div class="panel-header">
-          <span style="color: var(--text-main);">VMA / Krisinformation</span>
+          <span>VMA / Krisläge</span>
           <span class="vma-status-tag" id="vma-tag">NORMAL</span>
         </div>
         <div class="vma-content" id="vma-content">
-          Kontrollerar nationella och regionala larm...
+          Kontrollerar regionala larm...
+        </div>
+      </div>
+
+      <!-- Polis (Blå sektion med Notiser) -->
+      <div class="panel police-panel">
+        <div class="panel-header">
+          <div class="police-header-text">
+            <span>🛡</span>
+            <span>Polisen Jönköpings Län</span>
+          </div>
+          <button id="btn-push" class="push-toggle-btn" onclick="requestNotificationAccess()">Aktivera Notiser</button>
+        </div>
+        <div class="feed-container" id="police-feed">
+          <div style="font-size:0.75rem; color:var(--text-muted);">Hämtar Polishändelser...</div>
         </div>
       </div>
 
@@ -325,21 +360,21 @@
         <div class="panel-header">
           <div class="traffic-header-text">
             <span>⚠</span>
-            <span>Trafikavvikelser (Län 06)</span>
+            <span>Trafik (Län 06)</span>
           </div>
-          <span style="font-family: ui-monospace, monospace; font-size: 0.7rem; color: var(--text-muted);" id="traffic-counter">0 STÖRNINGAR</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 0.65rem; color: var(--text-muted);" id="traffic-counter">0 HÄNDELSER</span>
         </div>
-        <div class="traffic-feed" id="traffic-feed">
-          <div style="font-size:0.8rem; color:var(--text-muted);">Söker trafikläget...</div>
+        <div class="feed-container" id="traffic-feed">
+          <div style="font-size:0.75rem; color:var(--text-muted);">Söker trafikläget...</div>
         </div>
       </div>
 
     </div>
 
-    <!-- Kolumn 2: Satellitkarta / Endast Regn & Nederbörd (Utzoomad) -->
+    <!-- Kolumn 2: Satellitkarta Regn -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SATELLIT // ENBART REGNRADAR</div>
+        <div class="map-tag">SATELLIT // REGNRADAR</div>
         <iframe 
           id="radar-frame"
           src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=5&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
@@ -348,10 +383,10 @@
       </div>
     </div>
 
-    <!-- Kolumn 3: Satellitkarta / Blixtar & Åskradar (Utzoomad) -->
+    <!-- Kolumn 3: Satellitkarta Åska -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA REALTID</div>
+        <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA</div>
         <iframe 
           id="lightning-frame"
           src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#5/57.186/14.040" 
@@ -365,6 +400,9 @@
   <script>
     const LAT = 57.1864;
     const LON = 14.0403;
+
+    let knownPoliceEventIds = new Set();
+    let pushEnabled = false;
 
     const weatherCodes = {
       0: "Klart", 1: "Mestadels klart", 2: "Halvklart", 3: "Mulet",
@@ -395,14 +433,67 @@
       }
     }
 
-    // Trafikverket API: Strikt filtrerat på CountyNo 6 (Jönköpings län)
+    /* Web-Push Behörighet */
+    function requestNotificationAccess() {
+      if (!("Notification" in window)) {
+        alert("Webbläsaren saknar stöd för skrivbordsnotiser.");
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          pushEnabled = true;
+          const btn = document.getElementById('btn-push');
+          btn.textContent = "Notiser På";
+          btn.classList.add('enabled');
+          new Notification("FTE Kontrollrum", { body: "Pushnotiser för Polisen i Jönköpings län är nu aktiverade." });
+        }
+      });
+    }
+
+    /* Polisen API: Strikt Jönköpings län */
+    async function fetchPoliceEvents() {
+      const feed = document.getElementById('police-feed');
+      try {
+        const res = await fetch('https://polisen.se/api/events?locationname=J%C3%B6nk%C3%B6pings%20l%C3%A4n');
+        const events = await res.json();
+
+        if (!events || events.length === 0) {
+          feed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Inga aktuella polishändelser inrapporterade.</div>';
+          return;
+        }
+
+        // Identifiera och skicka pushnotis för helt nya larm
+        events.forEach(ev => {
+          if (knownPoliceEventIds.size > 0 && !knownPoliceEventIds.has(ev.id)) {
+            if (pushEnabled && Notification.permission === "granted") {
+              new Notification(`POLIS // ${ev.type} (${ev.location.name})`, {
+                body: ev.summary,
+                icon: "https://polisen.se/Static/images/police-badge.svg"
+              });
+            }
+          }
+          knownPoliceEventIds.add(ev.id);
+        });
+
+        feed.innerHTML = events.slice(0, 4).map(ev => `
+          <div class="feed-node police">
+            <div class="feed-title">${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})</div>
+            <div class="feed-msg">${ev.summary}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        feed.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem;">Polisdata uppdateras...</div>';
+      }
+    }
+
+    /* Trafikverket API: Strikt CountyNo 6 */
     async function fetchTraffic() {
       const feed = document.getElementById('traffic-feed');
       const counter = document.getElementById('traffic-counter');
       const xmlPayload = `
         <REQUEST>
           <LOGIN authenticationkey="5d4f134267254589a1fbbd09793108c9" />
-          <QUERY objecttype="Situation" schemaversion="1.5" limit="8">
+          <QUERY objecttype="Situation" schemaversion="1.5" limit="5">
             <FILTER>
               <EQ name="Deviation.CountyNo" value="6" />
             </FILTER>
@@ -430,22 +521,22 @@
         counter.textContent = `${deviations.length} HÄNDELSER`;
 
         if (deviations.length === 0) {
-          feed.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:0.5rem 0;">Inga registrerade störningar i länet. Normal framkomlighet.</div>';
+          feed.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Normal framkomlighet i länet.</div>';
           return;
         }
 
-        feed.innerHTML = deviations.map(d => `
-          <div class="traffic-node">
-            <div class="traffic-title">${d.RoadNumber ? 'VÄG ' + d.RoadNumber + ' // ' : ''}${d.Header || 'Avvikelse'}</div>
-            <div class="traffic-msg">${d.Message || 'Ingen ytterligare rapport.'}</div>
+        feed.innerHTML = deviations.slice(0, 4).map(d => `
+          <div class="feed-node traffic">
+            <div class="feed-title">${d.RoadNumber ? 'VÄG ' + d.RoadNumber + ' // ' : ''}${d.Header || 'Avvikelse'}</div>
+            <div class="feed-msg">${d.Message || 'Ingen detaljrapport.'}</div>
           </div>
         `).join('');
       } catch (err) {
-        feed.innerHTML = '<div style="color:var(--alert-red); font-size:0.8rem;">Fel vid kontakt med Trafikverkets API.</div>';
+        feed.innerHTML = '<div style="color:var(--alert-red); font-size:0.75rem;">Kontaktfel mot Trafikverket.</div>';
       }
     }
 
-    // VMA / Krisinformation
+    /* VMA / Krisinformation */
     async function fetchVMA() {
       const panel = document.getElementById('vma-panel');
       const tag = document.getElementById('vma-tag');
@@ -471,12 +562,12 @@
         } else {
           panel.classList.remove('active');
           tag.textContent = 'NORMAL';
-          content.innerHTML = 'Inga aktiva VMA utfärdade för Jönköpings län.';
+          content.innerHTML = 'Inga aktiva VMA i Jönköpings län.';
         }
       } catch (err) {
         panel.classList.remove('active');
         tag.textContent = 'STANDBY';
-        content.innerHTML = 'Inga aktiva larm identifierade.';
+        content.innerHTML = 'Inga aktiva larm.';
       }
     }
 
@@ -490,15 +581,25 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
+    setInterval(fetchPoliceEvents, 2 * 60 * 1000); // Polisen kontrolleras varannan minut
     setInterval(fetchTraffic, 2 * 60 * 1000);
     setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
-    // Initial körning
+    // Initial start
     updateClock();
     fetchWeather();
+    fetchPoliceEvents();
     fetchTraffic();
     fetchVMA();
+
+    // Återställ knappstatus om sidan redan har tillåtelse
+    if ("Notification" in window && Notification.permission === "granted") {
+      pushEnabled = true;
+      const btn = document.getElementById('btn-push');
+      btn.textContent = "Notiser På";
+      btn.classList.add('enabled');
+    }
   </script>
 </body>
 </html>
