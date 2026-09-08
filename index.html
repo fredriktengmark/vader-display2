@@ -336,25 +336,25 @@
 
     </div>
 
-    <!-- Kolumn 2: Satellit / Moln & Nederbörd -->
+    <!-- Kolumn 2: Satellitkarta / Endast Regn & Nederbörd (Utzoomad) -->
     <div class="panel">
       <div class="map-frame-wrapper">
-        <div class="map-tag">SATELLIT // MOLN & VÄDERSYSTEM</div>
+        <div class="map-tag">SATELLIT // ENBART REGNRADAR</div>
         <iframe 
           id="radar-frame"
-          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=7&overlay=satellite&product=satellite&level=surface&lat=57.186&lon=14.040" 
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m%2Fs&zoom=5&overlay=radar&product=radar&level=surface&lat=57.186&lon=14.040" 
           loading="lazy">
         </iframe>
       </div>
     </div>
 
-    <!-- Kolumn 3: Satellit / Åskradar -->
+    <!-- Kolumn 3: Satellitkarta / Blixtar & Åskradar (Utzoomad) -->
     <div class="panel">
       <div class="map-frame-wrapper">
         <div class="map-tag">SATELLIT // BLIXTAR & ÅSKA REALTID</div>
         <iframe 
           id="lightning-frame"
-          src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#6.5/57.186/14.040" 
+          src="https://map.blitzortung.org/index.php?interactive=1&MapStyle=2#5/57.186/14.040" 
           loading="lazy">
         </iframe>
       </div>
@@ -395,7 +395,7 @@
       }
     }
 
-    // Trafikverket API: Filtrerat strikt på länskod 6 (Jönköpings län)
+    // Trafikverket API: Strikt filtrerat på CountyNo 6 (Jönköpings län)
     async function fetchTraffic() {
       const feed = document.getElementById('traffic-feed');
       const counter = document.getElementById('traffic-counter');
@@ -490,8 +490,8 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
-    setInterval(fetchTraffic, 2 * 60 * 1000); // 2 min intervall
-    setInterval(fetchVMA, 1 * 60 * 1000);     // 1 min intervall
+    setInterval(fetchTraffic, 2 * 60 * 1000);
+    setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
     // Initial körning
