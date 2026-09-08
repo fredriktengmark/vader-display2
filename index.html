@@ -16,6 +16,7 @@
       --news-purple: #a855f7;
       --alert-yellow: #f59e0b;
       --alert-red: #ef4444;
+      --rescue-orange: #f97316;
       --status-green: #22c55e;
     }
 
@@ -75,7 +76,7 @@
     /* Huvudgrid */
     .main-grid {
       display: grid;
-      grid-template-columns: 440px 1fr 1fr;
+      grid-template-columns: 460px 1fr 1fr;
       gap: 0.75rem;
       flex: 1;
       min-height: 0;
@@ -104,7 +105,7 @@
       background: rgba(0, 0, 0, 0.25);
     }
 
-    /* VÄNSTER KOLUMN */
+    /* VÄNSTER KOLUMN: Rullbar vid behov */
     .telemetry-column {
       display: flex;
       flex-direction: column;
@@ -114,7 +115,7 @@
       padding-right: 2px;
     }
 
-    /* Väder */
+    /* Väder & Telemetri */
     .weather-card {
       padding: 0.5rem 0.9rem;
       display: flex;
@@ -164,6 +165,49 @@
       color: var(--accent-blue);
     }
 
+    /* NY MODUL: ELPRIS SE3 */
+    .power-panel {
+      border-top: 2px solid var(--status-green);
+    }
+    .power-card {
+      padding: 0.55rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(34, 197, 94, 0.03);
+    }
+    .power-main {
+      display: flex;
+      flex-direction: column;
+    }
+    .power-val-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+    .power-val {
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--status-green);
+      line-height: 1;
+    }
+    .power-unit {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .power-details {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: ui-monospace, monospace;
+    }
+    .power-details strong {
+      color: #cbd5e1;
+    }
+
     /* VMA */
     .vma-panel {
       border: 1px solid var(--border-color);
@@ -200,15 +244,17 @@
     /* Moduler */
     .section-panel {
       flex: 1;
-      min-height: 140px;
+      min-height: 125px;
       display: flex;
       flex-direction: column;
     }
 
-    .section-panel.police-box { border-top: 2px solid var(--police-blue); }
-    .section-panel.news-box   { border-top: 2px solid var(--news-purple); }
-    .section-panel.traffic-box{ border-top: 2px solid var(--alert-yellow); }
+    .section-panel.rescue-box  { border-top: 2px solid var(--rescue-orange); }
+    .section-panel.police-box  { border-top: 2px solid var(--police-blue); }
+    .section-panel.news-box    { border-top: 2px solid var(--news-purple); }
+    .section-panel.traffic-box { border-top: 2px solid var(--alert-yellow); }
 
+    .header-rescue { color: var(--rescue-orange); display: flex; align-items: center; gap: 0.4rem; }
     .header-police { color: #60a5fa; display: flex; align-items: center; gap: 0.4rem; }
     .header-news   { color: #d8b4fe; display: flex; align-items: center; gap: 0.4rem; }
     .header-traffic{ color: var(--alert-yellow); display: flex; align-items: center; gap: 0.4rem; }
@@ -216,10 +262,10 @@
     .feed-container {
       flex: 1;
       overflow-y: auto;
-      padding: 0.5rem;
+      padding: 0.45rem;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
     .feed-node {
       padding: 0.45rem 0.6rem;
@@ -235,6 +281,11 @@
       transform: translateX(2px);
     }
 
+    .feed-node.rescue {
+      background: rgba(249, 115, 22, 0.05);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      border-left: 3px solid var(--rescue-orange);
+    }
     .feed-node.police {
       background: rgba(37, 99, 235, 0.05);
       border: 1px solid rgba(59, 130, 246, 0.2);
@@ -258,6 +309,7 @@
       justify-content: space-between;
       align-items: center;
     }
+    .feed-node.rescue .feed-title { color: #fdba74; }
     .feed-node.police .feed-title { color: #93c5fd; }
     .feed-node.news .feed-title { color: #d8b4fe; }
     .feed-node.traffic .feed-title { color: var(--alert-yellow); }
@@ -318,7 +370,7 @@
   <!-- Huvudgrid -->
   <main class="main-grid">
 
-    <!-- Kolumn 1: Telemetri & Separata Moduler -->
+    <!-- Kolumn 1: Telemetri & Moduler -->
     <div class="telemetry-column">
 
       <!-- Väder -->
@@ -345,6 +397,27 @@
         </div>
       </div>
 
+      <!-- NY MODUL 1: ELPRIS SE3 -->
+      <div class="panel power-panel" id="power-panel">
+        <div class="panel-header">
+          <span style="color:var(--text-main);">Spotpris El // SE3 (Sverige)</span>
+          <span style="font-family:ui-monospace, monospace; font-size:0.65rem; color:var(--text-muted);" id="power-time-slot">TIMME --:--</span>
+        </div>
+        <div class="power-card">
+          <div class="power-main">
+            <div class="power-val-row">
+              <span class="power-val" id="power-val">--</span>
+              <span class="power-unit">öre / kWh</span>
+            </div>
+          </div>
+          <div class="power-details">
+            <div>MIN: <strong id="power-min">--</strong></div>
+            <div>SNITT: <strong id="power-avg">--</strong></div>
+            <div>MAX: <strong id="power-max">--</strong></div>
+          </div>
+        </div>
+      </div>
+
       <!-- VMA -->
       <div class="panel vma-panel" id="vma-panel">
         <div class="panel-header">
@@ -356,7 +429,21 @@
         </div>
       </div>
 
-      <!-- 1. Polis -->
+      <!-- NY MODUL 2: RÄDDNINGSTJÄNST & SOS ALARM -->
+      <div class="panel section-panel rescue-box">
+        <div class="panel-header">
+          <div class="header-rescue">
+            <span>🔥</span>
+            <span>Räddningstjänst / SOS (Län 06)</span>
+          </div>
+          <span style="font-family:ui-monospace, monospace; font-size:0.65rem; color:var(--text-muted);" id="rescue-counter">0 HÄNDELSER</span>
+        </div>
+        <div class="feed-container" id="rescue-feed">
+          <div style="font-size:0.75rem; color:var(--text-muted);">Hämtar larm från räddningstjänsten...</div>
+        </div>
+      </div>
+
+      <!-- Polis -->
       <div class="panel section-panel police-box">
         <div class="panel-header">
           <div class="header-police">
@@ -370,7 +457,7 @@
         </div>
       </div>
 
-      <!-- 2. Lokala Nyheter -->
+      <!-- Lokala Nyheter -->
       <div class="panel section-panel news-box">
         <div class="panel-header">
           <div class="header-news">
@@ -384,7 +471,7 @@
         </div>
       </div>
 
-      <!-- 3. Trafik: SR P4 Jönköping (Direktflöde) -->
+      <!-- Trafik -->
       <div class="panel section-panel traffic-box">
         <div class="panel-header">
           <div class="header-traffic">
@@ -462,6 +549,100 @@
       }
     }
 
+    /* 1. ELPRIS SE3 (elprisetjustnu.se Öppet JSON-API) */
+    async function fetchElectricityPrice() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+
+      try {
+        const res = await fetch(`https://www.elprisetjustnu.se/api/v1/prices/${year}/${month}-${day}_SE3.json`);
+        const prices = await res.json();
+
+        if (!prices || prices.length === 0) return;
+
+        const currentHour = now.getHours();
+        const currentData = prices.find(p => new Date(p.time_start).getHours() === currentHour) || prices[0];
+        
+        // SEK_per_kWh till öre/kWh inkl moms
+        const currentOre = Math.round(currentData.SEK_per_kWh * 100 * 1.25);
+        const allOren = prices.map(p => Math.round(p.SEK_per_kWh * 100 * 1.25));
+        const minOre = Math.min(...allOren);
+        const maxOre = Math.max(...allOren);
+        const avgOre = Math.round(allOren.reduce((a, b) => a + b, 0) / allOren.length);
+
+        const valElem = document.getElementById('power-val');
+        const panelElem = document.getElementById('power-panel');
+
+        valElem.textContent = currentOre;
+        document.getElementById('power-min').textContent = `${minOre} öre`;
+        document.getElementById('power-max').textContent = `${maxOre} öre`;
+        document.getElementById('power-avg').textContent = `${avgOre} öre`;
+        document.getElementById('power-time-slot').textContent = `KL ${String(currentHour).padStart(2, '0')}:00 - ${String(currentHour + 1).padStart(2, '0')}:00`;
+
+        // Färgkodning efter prisnivå
+        if (currentOre > 120) {
+          valElem.style.color = 'var(--alert-red)';
+          panelElem.style.borderTopColor = 'var(--alert-red)';
+        } else if (currentOre > 60) {
+          valElem.style.color = 'var(--alert-yellow)';
+          panelElem.style.borderTopColor = 'var(--alert-yellow)';
+        } else {
+          valElem.style.color = 'var(--status-green)';
+          panelElem.style.borderTopColor = 'var(--status-green)';
+        }
+      } catch (err) {
+        document.getElementById('power-val').textContent = 'N/A';
+      }
+    }
+
+    /* 2. RÄDDNINGSTJÄNST / SOS ALARM (Län 06 / Värnamo) */
+    async function fetchRescueEvents() {
+      const container = document.getElementById('rescue-feed');
+      const counter = document.getElementById('rescue-counter');
+
+      try {
+        // Hämtar incidenter från Polisen/SOS-kopplade händelser filtrerade på räddningsinsatser
+        const res = await fetch('https://polisen.se/api/events?locationname=J%C3%B6nk%C3%B6pings%20l%C3%A4n');
+        const allEvents = await res.json();
+
+        // Filtrera på räddningstjänstrelaterade nyckelord (brand, drunkning, olycka, sanering)
+        const rescueEvents = allEvents.filter(ev => {
+          const type = (ev.type || '').toLowerCase();
+          return type.includes('brand') || type.includes('olycka') || type.includes('räddning') || type.includes('farligt');
+        });
+
+        counter.textContent = `${rescueEvents.length} LARM`;
+
+        if (rescueEvents.length === 0) {
+          container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:0.2rem 0;">Inga pågående räddningsinsatser rapporterade.</div>';
+          return;
+        }
+
+        rescueEvents.slice(0, 3).forEach(ev => {
+          const id = 'rescue_' + ev.id;
+          const url = `https://polisen.se${ev.url}`;
+          if (knownIds.size > 0 && !knownIds.has(id)) {
+            triggerPush(`🔥 RÄDDNINGSTJÄNST // ${ev.type}`, `${ev.location.name}: ${ev.summary}`, url);
+          }
+          knownIds.add(id);
+        });
+
+        container.innerHTML = rescueEvents.slice(0, 3).map(ev => `
+          <a href="https://polisen.se${ev.url}" target="_blank" rel="noopener noreferrer" class="feed-node rescue">
+            <div class="feed-title">
+              <span>${ev.datetime.split(" ")[1]} // ${ev.type} (${ev.location.name})</span>
+              <span style="font-size:0.65rem; opacity:0.6;">↗</span>
+            </div>
+            <div class="feed-msg">${ev.summary}</div>
+          </a>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Räddningsflödet uppdateras...</div>';
+      }
+    }
+
     function requestNotificationAccess() {
       if (!("Notification" in window)) {
         alert("Webbläsaren saknar stöd för skrivbordsnotiser.");
@@ -474,7 +655,7 @@
           btn.textContent = "Push På";
           btn.classList.add('enabled');
           new Notification("FTE Kontrollrum", { 
-            body: "Pushnotiser aktiverade för Polis, Nyheter och Trafik i Jönköpings län."
+            body: "Pushnotiser aktiverade för Räddningstjänst, Polis och Nyheter i Jönköpings län."
           });
         }
       });
@@ -492,7 +673,7 @@
       }
     }
 
-    /* 1. POLISEN I JÖNKÖPINGS LÄN */
+    /* 3. POLISEN I JÖNKÖPINGS LÄN */
     async function fetchPolice() {
       const container = document.getElementById('police-feed');
       try {
@@ -527,7 +708,7 @@
       }
     }
 
-    /* 2. LOKALA NYHETER */
+    /* 4. LOKALA NYHETER */
     async function fetchNews() {
       const container = document.getElementById('news-feed');
       try {
@@ -562,18 +743,16 @@
       }
     }
 
-    /* 3. TRAFIKMEDDELANDEN: SVERIGES RADIO P4 JÖNKÖPING (Realtid & Öppet API) */
+    /* 5. TRAFIKMEDDELANDEN: SR P4 JÖNKÖPING */
     async function fetchTraffic() {
       const container = document.getElementById('traffic-feed');
       const counter = document.getElementById('traffic-counter');
 
       try {
-        // Hämtar direkt från P4 Jönköping trafikflöde
         const res = await fetch('https://api.sr.se/api/v2/traffic/messages?trafficareaname=J%C3%B6nk%C3%B6ping&format=json&size=20');
         const data = await res.json();
         const allMessages = data.messages || [];
 
-        // Kommuner och orter i Jönköpings län för att filtrera bort irrelevanta riksmeddelanden
         const jlLocations = [
           'jönköping', 'värnamo', 'nässjö', 'vetlanda', 'tranås', 'eksjö', 
           'gislaved', 'vaggeryd', 'habo', 'mullsjö', 'sävsjö', 'gnosjö', 
@@ -581,11 +760,9 @@
           'smålandsstenar', 'taberg', 'reftele', 'bredaryd', 'forsheda', 'bor'
         ];
 
-        // Strikt filtrering: Måste tillhöra Jönköping eller nämna orter i länet
         const localTraffic = allMessages.filter(msg => {
           const area = (msg.trafficarea && msg.trafficarea.name) ? msg.trafficarea.name.toLowerCase() : '';
           const fullText = `${msg.title || ''} ${msg.description || ''} ${msg.exactlocation || ''}`.toLowerCase();
-          
           if (area.includes('jönköping')) return true;
           return jlLocations.some(loc => fullText.includes(loc));
         });
@@ -597,7 +774,7 @@
           return;
         }
 
-        container.innerHTML = localTraffic.slice(0, 4).map(msg => `
+        container.innerHTML = localTraffic.slice(0, 3).map(msg => `
           <a href="https://sverigesradio.se/trafik" target="_blank" rel="noopener noreferrer" class="feed-node traffic">
             <div class="feed-title">
               <span>${msg.title}</span>
@@ -657,15 +834,19 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
+    setInterval(fetchElectricityPrice, 15 * 60 * 1000); // Elpris uppdateras varje kvart
+    setInterval(fetchRescueEvents, 2 * 60 * 1000);     // Räddningstjänst varannan minut
     setInterval(fetchPolice, 2 * 60 * 1000);
     setInterval(fetchNews, 4 * 60 * 1000);
-    setInterval(fetchTraffic, 2 * 60 * 1000); // Trafiken hämtas varannan minut
+    setInterval(fetchTraffic, 2 * 60 * 1000);
     setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
-    // Initial körning
+    // Initial start
     updateClock();
     fetchWeather();
+    fetchElectricityPrice();
+    fetchRescueEvents();
     fetchPolice();
     fetchNews();
     fetchTraffic();
