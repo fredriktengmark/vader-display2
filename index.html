@@ -190,7 +190,7 @@
       text-overflow: ellipsis;
     }
 
-    /* 3. OPS-GRID (3-KOLUMNERS KONTROLLRUMSVY) */
+    /* 3. OPS-GRID */
     .ops-grid {
       display: grid;
       grid-template-columns: 380px 1fr 390px;
@@ -262,7 +262,7 @@
       color: var(--cyan-ops);
     }
 
-    /* ERSÄTTNINGSMODUL: RJL NYHETER OCH PRESSMEDDELANDEN */
+    /* MODUL: RJL NYHETER VIA RSS */
     .rjl-news-panel {
       border-top: 2px solid var(--rjl-red);
     }
@@ -330,7 +330,7 @@
       50% { box-shadow: inset 0 0 20px rgba(200, 16, 46, 0.4); }
     }
 
-    /* MITTENKOLUMN: KARTMATRIS */
+    /* MITTENKOLUMN: KARTOR */
     .col-center {
       display: grid;
       grid-template-rows: 1fr 1fr;
@@ -510,17 +510,17 @@
   <!-- 3. HUVUDMATRIS -->
   <main class="ops-grid">
 
-    <!-- VÄNSTER: NYHETER OCH PRESSMEDDELANDEN RJL SAMT TELEMETRI -->
+    <!-- VÄNSTER: NYHETER OCH PRESSMEDDELANDEN VIA RSS SAMT TELEMETRI -->
     <div class="col-left">
 
-      <!-- MODUL: NYHETER OCH PRESSMEDDELANDEN (RJL.SE) -->
+      <!-- MODUL: RJL NYHETER OCH PRESSMEDDELANDEN VIA RSS -->
       <div class="ops-panel rjl-news-panel">
         <div class="panel-header">
           <span style="color:#fca5a5;">📰 Nyheter & Pressmeddelanden // RJL</span>
-          <a href="https://www.rjl.se/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-ops); text-decoration:none; font-size:0.6rem;">rjl.se ↗</a>
+          <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-ops); text-decoration:none; font-size:0.6rem;">rjl.se ↗</a>
         </div>
         <div class="rjl-news-container" id="rjl-news-feed">
-          <div style="font-size:0.72rem; color:var(--text-muted); padding:0.4rem;">Hämtar nyheter från rjl.se...</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); padding:0.4rem;">Hämtar RSS-flöde från rjl.se...</div>
         </div>
       </div>
 
@@ -660,17 +660,17 @@
       document.getElementById('date').textContent = now.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
     }
 
-    /* RJL.SE - NYHETER OCH PRESSMEDDELANDEN */
+    /* RJL.SE - HÄMTA NYHETER OCH PRESSMEDDELANDEN VIA RSS */
     async function fetchRjlNews() {
       const container = document.getElementById('rjl-news-feed');
       
-      // Publikt RSS/Atom-flöde för nyheter & pressmeddelanden från rjl.se via AllOrigins CORS-proxy
-      const targetRss = encodeURIComponent('https://www.rjl.se/om-oss/pressrum/pressmeddelanden/rss/');
-      const proxyUrl = `https://api.allorigins.win/get?url=${targetRss}&timestamp=${Date.now()}`;
+      // RJL:s officiella RSS-kanal för nyheter och press
+      const rjlRssUrl = 'https://www.rjl.se/om-oss/pressrum/nyheter/rss/';
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rjlRssUrl)}&timestamp=${Date.now()}`;
 
       try {
         const res = await fetch(proxyUrl);
-        if (!res.ok) throw new Error('Kunde inte läsa nyhetsflödet');
+        if (!res.ok) throw new Error('Kunde inte läsa RSS via proxy');
         const data = await res.json();
         
         const parser = new DOMParser();
@@ -678,7 +678,7 @@
         const items = xmlDoc.querySelectorAll("item");
 
         if (!items || items.length === 0) {
-          throw new Error('Inga artiklar returnerades');
+          throw new Error('Inga artiklar i flödet');
         }
 
         let html = '';
@@ -698,10 +698,9 @@
             }
           }
 
-          // Rensa eventuell HTML ur beskrivning
           let desc = item.querySelector("description")?.textContent || "";
           desc = desc.replace(/<[^>]*>?/gm, '').trim();
-          if (desc.length > 95) desc = desc.substring(0, 95) + '...';
+          if (desc.length > 90) desc = desc.substring(0, 90) + '...';
 
           html += `
             <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-node">
@@ -716,14 +715,13 @@
 
         container.innerHTML = html;
       } catch (err) {
-        // Reservvisning med direkta snabblänkar till RJL Pressrum om nätverket tappar proxyaccess
         container.innerHTML = `
           <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" class="news-node">
             <div class="news-header-row">
               <span>Nyheter & press</span>
               <span class="news-date">Aktuellt</span>
             </div>
-            <div class="news-body">Senaste nytt och pressmeddelanden från Region Jönköpings län. Klicka för att läsa på rjl.se.</div>
+            <div class="news-body">Senaste nytt från Region Jönköpings län. Klicka för att öppna flödet på rjl.se.</div>
           </a>
         `;
       }
@@ -1098,7 +1096,7 @@
       if (snow) snow.src = snow.src;
     }
 
-    // Intervaller
+    // Uppdateringsintervaller
     setInterval(updateClock, 1000);
     setInterval(fetchGridStatus, 5000);
     setInterval(fetchRjlNews, 10 * 60 * 1000);
@@ -1111,7 +1109,7 @@
     setInterval(fetchVMA, 1 * 60 * 1000);
     setInterval(refreshMaps, 10 * 60 * 1000);
 
-    // Initial körning
+    // Initial startkörning
     updateClock();
     fetchGridStatus();
     fetchRjlNews();
