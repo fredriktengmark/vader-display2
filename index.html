@@ -262,7 +262,7 @@
       color: var(--cyan-ops);
     }
 
-    /* MODUL: RJL NYHETER VIA RSS */
+    /* MODUL: RJL NYHETER */
     .rjl-news-panel {
       border-top: 2px solid var(--rjl-red);
     }
@@ -510,17 +510,17 @@
   <!-- 3. HUVUDMATRIS -->
   <main class="ops-grid">
 
-    <!-- VÄNSTER: NYHETER OCH PRESSMEDDELANDEN VIA RSS SAMT TELEMETRI -->
+    <!-- VÄNSTER: NYHETER FRÅN RJL SAMT TELEMETRI -->
     <div class="col-left">
 
-      <!-- MODUL: RJL NYHETER OCH PRESSMEDDELANDEN VIA RSS -->
+      <!-- MODUL: RJL NYHETER OCH PRESSMEDDELANDEN -->
       <div class="ops-panel rjl-news-panel">
         <div class="panel-header">
           <span style="color:#fca5a5;">📰 Nyheter & Pressmeddelanden // RJL</span>
           <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-ops); text-decoration:none; font-size:0.6rem;">rjl.se ↗</a>
         </div>
         <div class="rjl-news-container" id="rjl-news-feed">
-          <div style="font-size:0.72rem; color:var(--text-muted); padding:0.4rem;">Hämtar RSS-flöde från rjl.se...</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); padding:0.4rem;">Hämtar nyheter från rjl.se...</div>
         </div>
       </div>
 
@@ -660,71 +660,81 @@
       document.getElementById('date').textContent = now.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
     }
 
-    /* RJL.SE - HÄMTA NYHETER OCH PRESSMEDDELANDEN VIA RSS */
+    /* RJL.SE - HÄMTA NYHETER OCH PRESSMEDDELANDEN VIA RSS2JSON (DRIFTSÄKER METOD) */
     async function fetchRjlNews() {
       const container = document.getElementById('rjl-news-feed');
-      
-      // RJL:s officiella RSS-kanal för nyheter och press
       const rjlRssUrl = 'https://www.rjl.se/om-oss/pressrum/nyheter/rss/';
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rjlRssUrl)}&timestamp=${Date.now()}`;
-
+      
       try {
-        const res = await fetch(proxyUrl);
-        if (!res.ok) throw new Error('Kunde inte läsa RSS via proxy');
-        const data = await res.json();
+        // Primär metod: rss2json konverterar RJL:s XML direkt till JSON utan CORS-problem
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rjlRssUrl)}&_t=${Date.now()}`);
         
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-        const items = xmlDoc.querySelectorAll("item");
-
-        if (!items || items.length === 0) {
-          throw new Error('Inga artiklar i flödet');
-        }
-
-        let html = '';
-        const limit = Math.min(items.length, 4);
-
-        for (let i = 0; i < limit; i++) {
-          const item = items[i];
-          const title = item.querySelector("title")?.textContent || "Nyhet från RJL";
-          const link = item.querySelector("link")?.textContent || "https://www.rjl.se/";
-          const pubDateRaw = item.querySelector("pubDate")?.textContent || "";
-          
-          let formattedDate = "";
-          if (pubDateRaw) {
-            const d = new Date(pubDateRaw);
-            if (!isNaN(d.getTime())) {
-              formattedDate = d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
-            }
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'ok' && data.items && data.items.length > 0) {
+            renderNewsItems(data.items.slice(0, 4));
+            return;
           }
+        }
+        throw new Error('Primär RSS-motor svarade inte');
+      } catch (err1) {
+        // Sekundär fallback via codetabs proxy
+        try {
+          const res2 = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rjlRssUrl)}`);
+          const text = await res2.text();
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, "text/xml");
+          const xmlItems = Array.from(xml.querySelectorAll("item")).slice(0, 4);
 
-          let desc = item.querySelector("description")?.textContent || "";
-          desc = desc.replace(/<[^>]*>?/gm, '').trim();
-          if (desc.length > 90) desc = desc.substring(0, 90) + '...';
-
-          html += `
-            <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-node">
+          if (xmlItems.length > 0) {
+            const mapped = xmlItems.map(item => ({
+              title: item.querySelector("title")?.textContent || "Nyhet",
+              link: item.querySelector("link")?.textContent || "https://www.rjl.se/",
+              pubDate: item.querySelector("pubDate")?.textContent || "",
+              description: item.querySelector("description")?.textContent || ""
+            }));
+            renderNewsItems(mapped);
+            return;
+          }
+        } catch (err2) {
+          // Reservlänk om båda externa proxies skulle vara tillfälligt blockerade
+          container.innerHTML = `
+            <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" class="news-node">
               <div class="news-header-row">
-                <span>${title}</span>
-                <span class="news-date">${formattedDate}</span>
+                <span>Nyheter från RJL</span>
+                <span class="news-date">Länk</span>
               </div>
-              <div class="news-body">${desc}</div>
+              <div class="news-body">Klicka för att öppna de senaste nyheterna och pressmeddelandena direkt på rjl.se.</div>
             </a>
           `;
         }
+      }
+    }
 
-        container.innerHTML = html;
-      } catch (err) {
-        container.innerHTML = `
-          <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" class="news-node">
+    function renderNewsItems(items) {
+      const container = document.getElementById('rjl-news-feed');
+      container.innerHTML = items.map(item => {
+        let dateStr = "";
+        if (item.pubDate) {
+          const d = new Date(item.pubDate);
+          if (!isNaN(d.getTime())) {
+            dateStr = d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+          }
+        }
+        
+        let desc = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
+        if (desc.length > 85) desc = desc.substring(0, 85) + '...';
+
+        return `
+          <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-node">
             <div class="news-header-row">
-              <span>Nyheter & press</span>
-              <span class="news-date">Aktuellt</span>
+              <span>${item.title}</span>
+              <span class="news-date">${dateStr}</span>
             </div>
-            <div class="news-body">Senaste nytt från Region Jönköpings län. Klicka för att öppna flödet på rjl.se.</div>
+            <div class="news-body">${desc}</div>
           </a>
         `;
-      }
+      }).join('');
     }
 
     /* TELEMETRI VÄDER */
