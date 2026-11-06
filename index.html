@@ -27,7 +27,6 @@
       --yellow-warn: #f59e0b;
       --orange-alert: #f97316;
       --red-alarm: #c8102e;
-      --purple-it: #a855f7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -131,7 +130,7 @@
       line-height: 1;
     }
 
-    /* 2. STATUS-RIBBON (KONTROLLRUMMETS KPI-LIST) */
+    /* 2. STATUS-RIBBON (KPI-LIST) */
     .status-ribbon {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -223,7 +222,7 @@
       justify-content: space-between;
     }
 
-    /* VÄNSTER KOLUMN: DRIFT, ENERGI & INTRANÄT */
+    /* VÄNSTER KOLUMN: TELEMETRI & NYHETER */
     .col-left {
       display: flex;
       flex-direction: column;
@@ -263,30 +262,25 @@
       color: var(--cyan-ops);
     }
 
-    /* RJL Intranät-paneler */
-    .intranet-panel {
-      border-top: 2px solid var(--blue-ops);
-    }
-    .intranet-panel.it-box {
-      border-top: 2px solid var(--purple-it);
-    }
-    .intranet-panel.ops-box {
+    /* ERSÄTTNINGSMODUL: RJL NYHETER OCH PRESSMEDDELANDEN */
+    .rjl-news-panel {
       border-top: 2px solid var(--rjl-red);
     }
-    .intranet-feed-container {
-      padding: 0.4rem 0.65rem;
+    .rjl-news-container {
+      padding: 0.45rem 0.65rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      max-height: 140px;
+      gap: 0.4rem;
+      max-height: 220px;
       overflow-y: auto;
     }
-    .intranet-node {
+    .news-node {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border-ops);
+      border-left: 3px solid var(--rjl-red);
       border-radius: 3px;
-      padding: 0.35rem 0.5rem;
-      font-size: 0.7rem;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.72rem;
       display: flex;
       flex-direction: column;
       gap: 2px;
@@ -294,29 +288,25 @@
       color: inherit;
       transition: background 0.15s ease;
     }
-    .intranet-node:hover {
+    .news-node:hover {
       background: rgba(255, 255, 255, 0.05);
     }
-    .intranet-node.alert {
-      border-left: 3px solid var(--yellow-warn);
-      background: rgba(245, 158, 11, 0.06);
-    }
-    .intranet-node.critical {
-      border-left: 3px solid var(--rjl-red);
-      background: var(--rjl-red-soft);
-    }
-    .intranet-title-row {
+    .news-header-row {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
       font-weight: 700;
-      color: #e2e8f0;
-      font-size: 0.68rem;
+      color: #f1f5f9;
+      font-size: 0.7rem;
     }
-    .intranet-node.alert .intranet-title-row { color: #fde047; }
-    .intranet-node.critical .intranet-title-row { color: #fca5a5; }
-    .intranet-body {
+    .news-date {
+      font-family: ui-monospace, monospace;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+    .news-body {
       color: #94a3b8;
-      font-size: 0.65rem;
+      font-size: 0.66rem;
       line-height: 1.25;
     }
 
@@ -520,40 +510,17 @@
   <!-- 3. HUVUDMATRIS -->
   <main class="ops-grid">
 
-    <!-- VÄNSTER: TELEMETRI, IT & VERKSAMHETSMEDDELANDEN -->
+    <!-- VÄNSTER: NYHETER OCH PRESSMEDDELANDEN RJL SAMT TELEMETRI -->
     <div class="col-left">
 
-      <!-- NY PANEL: RJL IT-MEDDELANDE -->
-      <div class="ops-panel intranet-panel it-box">
+      <!-- MODUL: NYHETER OCH PRESSMEDDELANDEN (RJL.SE) -->
+      <div class="ops-panel rjl-news-panel">
         <div class="panel-header">
-          <span style="color:var(--purple-it);">💻 RJL IT-Drift // Intranät</span>
-          <a href="https://intranat.rjl.se/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-ops); text-decoration:none; font-size:0.6rem;">intranat.rjl.se ↗</a>
+          <span style="color:#fca5a5;">📰 Nyheter & Pressmeddelanden // RJL</span>
+          <a href="https://www.rjl.se/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-ops); text-decoration:none; font-size:0.6rem;">rjl.se ↗</a>
         </div>
-        <div class="intranet-feed-container" id="rjl-it-feed">
-          <div class="intranet-node">
-            <div class="intranet-title-row">
-              <span>IT-Status: Normal drift</span>
-              <span style="color:var(--green-ok);">● OK</span>
-            </div>
-            <div class="intranet-body">Inga större centrala systemstörningar eller driftavbrott rapporterade på RJL Intranät.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NY PANEL: RJL VERKSAMHETSMEDDELANDE -->
-      <div class="ops-panel intranet-panel ops-box">
-        <div class="panel-header">
-          <span style="color:#fca5a5;">📢 Verksamhetsmeddelande // RJL</span>
-          <span style="font-family:ui-monospace, monospace; font-size:0.6rem; color:var(--text-muted);" id="rjl-ops-count">AKTUELLT</span>
-        </div>
-        <div class="intranet-feed-container" id="rjl-ops-feed">
-          <div class="intranet-node">
-            <div class="intranet-title-row">
-              <span>Fastighet & Sjukhusdrift</span>
-              <span style="color:var(--cyan-ops);">Värnamo</span>
-            </div>
-            <div class="intranet-body">Inga allmänna verksamhetsstörningar eller regionala stabslägen utlysta via intranätet.</div>
-          </div>
+        <div class="rjl-news-container" id="rjl-news-feed">
+          <div style="font-size:0.72rem; color:var(--text-muted); padding:0.4rem;">Hämtar nyheter från rjl.se...</div>
         </div>
       </div>
 
@@ -676,10 +643,6 @@
     const LAT = 57.1864;
     const LON = 14.0403;
 
-    // RJL Intranät-konfiguration (kan pekas mot intern API-proxy eller lokal spegling om CORS tillämpas)
-    const RJL_IT_ENDPOINT = "https://intranat.rjl.se/api/it-drift/latest";
-    const RJL_OPS_ENDPOINT = "https://intranat.rjl.se/api/verksamhet/latest";
-
     let knownIds = new Set();
     let pushEnabled = false;
 
@@ -697,87 +660,72 @@
       document.getElementById('date').textContent = now.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
     }
 
-    /* RJL INTRANÄT - IT-MEDDELANDE */
-    async function fetchRjlItMessages() {
-      const container = document.getElementById('rjl-it-feed');
+    /* RJL.SE - NYHETER OCH PRESSMEDDELANDEN */
+    async function fetchRjlNews() {
+      const container = document.getElementById('rjl-news-feed');
+      
+      // Publikt RSS/Atom-flöde för nyheter & pressmeddelanden från rjl.se via AllOrigins CORS-proxy
+      const targetRss = encodeURIComponent('https://www.rjl.se/om-oss/pressrum/pressmeddelanden/rss/');
+      const proxyUrl = `https://api.allorigins.win/get?url=${targetRss}&timestamp=${Date.now()}`;
+
       try {
-        const res = await fetch(RJL_IT_ENDPOINT, { mode: 'cors' });
-        if (!res.ok) throw new Error('Intranät kräver intern access');
-        const items = await res.json();
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error('Kunde inte läsa nyhetsflödet');
+        const data = await res.json();
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
 
         if (!items || items.length === 0) {
-          container.innerHTML = `
-            <div class="intranet-node">
-              <div class="intranet-title-row">
-                <span>IT-Status: Normal drift</span>
-                <span style="color:var(--green-ok)">● OK</span>
-              </div>
-              <div class="intranet-body">Inga pågående IT-störningar rapporterade på intranätet.</div>
-            </div>`;
-          return;
+          throw new Error('Inga artiklar returnerades');
         }
 
-        container.innerHTML = items.slice(0, 3).map(msg => `
-          <a href="https://intranat.rjl.se/" target="_blank" rel="noopener noreferrer" class="intranet-node ${msg.severity === 'high' ? 'critical' : msg.severity === 'medium' ? 'alert' : ''}">
-            <div class="intranet-title-row">
-              <span>${msg.title || 'IT-Driftmeddelande'}</span>
-              <span style="font-size:0.6rem; opacity:0.8;">${msg.time || ''}</span>
-            </div>
-            <div class="intranet-body">${msg.description || msg.body}</div>
-          </a>
-        `).join('');
-      } catch (e) {
-        // Fallback när intranätets interna auth/CORS inte tillåter extern läsning
-        container.innerHTML = `
-          <div class="intranet-node">
-            <div class="intranet-title-row">
-              <span>IT-Drift // Intranät RJL</span>
-              <span style="color:var(--green-ok)">● NORMALLÄGE</span>
-            </div>
-            <div class="intranet-body">Övervakning aktiv. Inga centrala driftlarm flaggade i FTE-konsolen.</div>
-          </div>`;
-      }
-    }
+        let html = '';
+        const limit = Math.min(items.length, 4);
 
-    /* RJL INTRANÄT - VERKSAMHETSMEDDELANDE */
-    async function fetchRjlOpsMessages() {
-      const container = document.getElementById('rjl-ops-feed');
-      try {
-        const res = await fetch(RJL_OPS_ENDPOINT, { mode: 'cors' });
-        if (!res.ok) throw new Error('Intranät kräver intern access');
-        const items = await res.json();
+        for (let i = 0; i < limit; i++) {
+          const item = items[i];
+          const title = item.querySelector("title")?.textContent || "Nyhet från RJL";
+          const link = item.querySelector("link")?.textContent || "https://www.rjl.se/";
+          const pubDateRaw = item.querySelector("pubDate")?.textContent || "";
+          
+          let formattedDate = "";
+          if (pubDateRaw) {
+            const d = new Date(pubDateRaw);
+            if (!isNaN(d.getTime())) {
+              formattedDate = d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+            }
+          }
 
-        if (!items || items.length === 0) {
-          container.innerHTML = `
-            <div class="intranet-node">
-              <div class="intranet-title-row">
-                <span>Regionfastigheter // Drift</span>
-                <span style="color:var(--cyan-ops)">NORMAL</span>
+          // Rensa eventuell HTML ur beskrivning
+          let desc = item.querySelector("description")?.textContent || "";
+          desc = desc.replace(/<[^>]*>?/gm, '').trim();
+          if (desc.length > 95) desc = desc.substring(0, 95) + '...';
+
+          html += `
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-node">
+              <div class="news-header-row">
+                <span>${title}</span>
+                <span class="news-date">${formattedDate}</span>
               </div>
-              <div class="intranet-body">Inga allmänna verksamhetsstörningar utlysta.</div>
-            </div>`;
-          return;
+              <div class="news-body">${desc}</div>
+            </a>
+          `;
         }
 
-        container.innerHTML = items.slice(0, 3).map(msg => `
-          <a href="https://intranat.rjl.se/" target="_blank" rel="noopener noreferrer" class="intranet-node ${msg.severity === 'high' ? 'critical' : msg.severity === 'medium' ? 'alert' : ''}">
-            <div class="intranet-title-row">
-              <span>${msg.title || 'Verksamhetsmeddelande'}</span>
-              <span style="font-size:0.6rem; opacity:0.8;">${msg.time || ''}</span>
-            </div>
-            <div class="intranet-body">${msg.description || msg.body}</div>
-          </a>
-        `).join('');
-      } catch (e) {
-        // Fallback vid skyddat intranät
+        container.innerHTML = html;
+      } catch (err) {
+        // Reservvisning med direkta snabblänkar till RJL Pressrum om nätverket tappar proxyaccess
         container.innerHTML = `
-          <div class="intranet-node">
-            <div class="intranet-title-row">
-              <span>Verksamhet // Region Jönköpings län</span>
-              <span style="color:var(--cyan-ops)">BEVAKNING</span>
+          <a href="https://www.rjl.se/om-oss/pressrum/nyheter/" target="_blank" rel="noopener noreferrer" class="news-node">
+            <div class="news-header-row">
+              <span>Nyheter & press</span>
+              <span class="news-date">Aktuellt</span>
             </div>
-            <div class="intranet-body">Normal fastighets- och sjukhusdrift i Värnamo och Region Jönköpings län.</div>
-          </div>`;
+            <div class="news-body">Senaste nytt och pressmeddelanden från Region Jönköpings län. Klicka för att läsa på rjl.se.</div>
+          </a>
+        `;
       }
     }
 
@@ -1153,8 +1101,7 @@
     // Intervaller
     setInterval(updateClock, 1000);
     setInterval(fetchGridStatus, 5000);
-    setInterval(fetchRjlItMessages, 3 * 60 * 1000);
-    setInterval(fetchRjlOpsMessages, 3 * 60 * 1000);
+    setInterval(fetchRjlNews, 10 * 60 * 1000);
     setInterval(fetchWeather, 10 * 60 * 1000);
     setInterval(fetchWeatherWarnings, 5 * 60 * 1000);
     setInterval(fetchElectricityPrice, 15 * 60 * 1000);
@@ -1167,8 +1114,7 @@
     // Initial körning
     updateClock();
     fetchGridStatus();
-    fetchRjlItMessages();
-    fetchRjlOpsMessages();
+    fetchRjlNews();
     fetchWeather();
     fetchWeatherWarnings();
     fetchElectricityPrice();
